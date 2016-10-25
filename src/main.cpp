@@ -1,32 +1,63 @@
+/***********************************
 
+    Title : MIRO airpointer project
+    Copyright(C) 2016 MIRO KyongPook Univ
+     
+    하현수, 박민규, 이재훈, 황인득, 이동은
+    update : 2016.10.25 23:58
 
-/*
-    MIRO airpointer project
-    Copyright(C) 2016 MIRO
-    provider : GeekTree0101
-    update : 2016.10.24s
-*/
+***********************************/
+
+/**********************************
+
+       [+] Import Library
+
+**********************************/
+
 #include <Wire.h>
 #include <Mouse.h>
 #include <Keyboard.h>
 #include <MPU6050.h>
 
+/**********************************
 
-//Definition or const value area
+    [+] Global & Const Variables
 
-//#define BUTTON_IO PORTB
-//#define BUTTON_DIR DDRB
-boolean flag = false;
-//Function area
+**********************************/
 
-void Button_setup();
-void MPU_setup();
-void Mouse_interface_setup();
-void Keyboard_interface_setup();
+#define BUTTON_IO PORTB                 //Button Bport I/O Register
+#define BUTTON_DIR DDRB                 //Button Bport DIR Register
 
-//Setup
+#define Z_key 122                       //KeyValue Data
+#define O_key 79
+#define H_key 72
 
-void setup(){
+#define Drawing_button 7                //Button Pin (PULL-UP Button)
+#define Click_button 8
+#define ZoomIn_button 9
+#define Motion_button 10
+
+#define key_press_delay 30              //key & Mouse Motion delay time
+#define mouse_press_delay 80
+#define Hardware_delay 10               //Hardware Delay
+
+boolean flag = false;                   //Drawing Flag
+
+/**********************************
+
+        [+] Function
+
+***********************************/
+
+void Button_setup();                    //Pull-up Digital Button
+void MPU_setup();                       //MPU6050 Init Setup
+void Mouse_interface_setup();           //Mouse Init Setup
+void Keyboard_interface_setup();        //Keyboard Init Setup
+void Click_event();                     //Click event Function
+void Drawing_event();                   //Drawing event Function
+void ZoomIn_event();                    //Zoomin event Function
+
+void setup(){                               //Hardware Setup
 
     Button_setup();
     MPU_setup();
@@ -34,13 +65,12 @@ void setup(){
     Keyboard_interface_setup();
 }
 
-//Main loop proc
-
-void loop(){
+void loop(){                                //Main Loop Proc
 
     //XXX : Must import Low Battery System Cuz, overhead very big in this loop
-    int16_t* Acc_value;
-    Acc_value = (int16_t*)malloc(6*sizeof(int16_t));
+    
+    int16_t* Data_Stack;
+    Data_Stack = (int16_t*)malloc(6*sizeof(int16_t));
     
 
     while(1){
@@ -50,99 +80,92 @@ void loop(){
         Wire.endTransmission(false);             //Sustain connection
         Wire.requestFrom(0x68, 14, true);
 
-        Acc_value[0] = Wire.read() << 8 | Wire.read();  // X pos data
-        Acc_value[1] = Wire.read() << 8 | Wire.read();  // Y pos data
-        Acc_value[2] = Wire.read() << 8 | Wire.read();
-        Acc_value[3] = Wire.read() << 8 | Wire.read();
-        Acc_value[4] = Wire.read() << 8 | Wire.read();  // z acc
-        Acc_value[5] = Wire.read() << 8 | Wire.read();  //
+        Data_Stack[0] = Wire.read() << 8 | Wire.read();  // X pos data
+        Data_Stack[1] = Wire.read() << 8 | Wire.read();  // Y pos data
+
+        //HACK : If you need more special function then using these data
+        Data_Stack[2] = Wire.read() << 8 | Wire.read();   
+        Data_Stack[3] = Wire.read() << 8 | Wire.read();
+        Data_Stack[4] = Wire.read() << 8 | Wire.read();  
+        Data_Stack[5] = Wire.read() << 8 | Wire.read();  
         
-        if(digitalRead(8) == LOW){              //Button Click
+        if(digitalRead(Click_button) == LOW){              //Click Function
 
-            Mouse.click(MOUSE_LEFT);
-            delay(500);
+            Click_event();
         }
 
-        if(digitalRead(7) == LOW){
-           Mouse.click(MOUSE_RIGHT);
-           delay(80);
-           Keyboard.press(79);
-           delay(30);
-           Keyboard.release(79);          
-           delay(30);
-           Keyboard.press(72);
-           delay(30);
-           Keyboard.release(72);  
+        if(digitalRead(Drawing_button) == LOW){            //Drawing Function
 
-           if(flag){
-            flag = false;
-           }
-           else{
-            flag = true;
-           }
-           delay(1000);
+            Drawing_event();
         }
 
-        if(digitalRead(9) == LOW){
+        if(digitalRead(ZoomIn_button) == LOW){             //ZoomIn Function
 
-           Mouse.click(MOUSE_RIGHT);
-           delay(80);
-           Keyboard.press(122);
-           delay(30);
-           Keyboard.release(122);
+            ZoomIn_event();
         }
 
-        if(digitalRead(10) == LOW){              //Gyro action
-            int X = 0;
-            int Y = 0;
+        if(digitalRead(Motion_button) == LOW){              //Motion Control
             
-            if(Acc_value[0] > 10000){                      //left right
-              X = 5 + (Acc_value[0] % 10000) / 1000;
+            //TODO : Don't make it as Function
+            //       Due to OverHead during make a new stack on the memory
+
+            short X = 0;
+            short Y = 0;
+            
+            if(Data_Stack[0] > 10000){                      // Left/Right Motion
+                                     
+              X = 5 + (Data_Stack[0] % 10000) / 1000;
             } 
-            else if(Acc_value[0] < -10000){
-              X = -5 + (Acc_value[0] % 10000) / 1000;
+            else if(Data_Stack[0] < -10000){
+
+              X = -5 + (Data_Stack[0] % 10000) / 1000;
             }
             
-            if(Acc_value[1] > 10000){                       // up down
-               Y = 5 + (Acc_value[1] % 10000) / 1000;
+            if(Data_Stack[1] > 10000){                      // Up/Down Motion
+                                      
+               Y = 5 + (Data_Stack[1] % 10000) / 1000;
             }
-            else if(Acc_value[1] < -10000){
-              Y = -5 + (Acc_value[1] % 10000) / 1000;
+            else if(Data_Stack[1] < -10000){
+
+              Y = -5 + (Data_Stack[1] % 10000) / 1000;
             }            
 
-            Serial.print(X);
+            /* 
+            Serial.print(X);                              //Debug : X,Y pos Serial Debug
             Serial.print("|");
             Serial.print(Y);
             Serial.println("");
-            if(flag){
-              Mouse.click(MOUSE_LEFT);
+            */
+
+            if(flag){                                     // Flag = true : Drawing
+            
+              Mouse.click(MOUSE_LEFT);                    
             }
-            Mouse.move(X,Y,0);   
+            
+            Mouse.move(X,Y,0);                            // Mouse Pointer moving method
         }
 
-        delay(10);
+        delay(Hardware_delay);                            // Loop-Proc delay time
     }
 
 
-    free(Acc_value);
+    free(Data_Stack);                                     // Data-Stack memory free
 }
 
 
-// Function area
 void Button_setup(){                        //Pull-up Digital Button;
 
     //XXX : Must script base on DDR, PORT register
-    pinMode(7,INPUT);
-    pinMode(8,INPUT);
-    pinMode(9,INPUT);
-    pinMode(10,INPUT);
+    pinMode(Drawing_button,INPUT);
+    pinMode(Click_button ,INPUT);
+    pinMode(ZoomIn_button,INPUT);
+    pinMode(Motion_button,INPUT);
 
-    digitalWrite(7,HIGH);
-    digitalWrite(8,HIGH);
-    digitalWrite(9,HIGH);
-    digitalWrite(10,HIGH);
+    digitalWrite(Drawing_button,HIGH);
+    digitalWrite(Click_button ,HIGH);
+    digitalWrite(ZoomIn_button,HIGH);
+    digitalWrite(Motion_button,HIGH);
 }
-
 
 void MPU_setup(){                           //MPU6050 Init Setup
 
@@ -165,3 +188,41 @@ void Keyboard_interface_setup(){            //Keyboard Init Setup
     Keyboard.begin();
     delay(30);
 }
+
+void Click_event(){                         //Click event Function
+
+    Mouse.click(MOUSE_LEFT);
+    delay(500);
+}
+
+void Drawing_event(){                       //Drawing event Function
+    
+    Mouse.click(MOUSE_RIGHT);
+    delay(mouse_press_delay);
+    Keyboard.press(O_key);
+    delay(key_press_delay);
+    Keyboard.release(O_key);          
+    delay(key_press_delay);
+    Keyboard.press(H_key);
+    delay(key_press_delay);
+    Keyboard.release(H_key);  
+
+    if(flag){
+        flag = false;
+    }
+    else{
+        flag = true;
+    }
+    delay(1000);
+
+}
+
+void ZoomIn_event(){                       //Zoomin event Function
+
+    Mouse.click(MOUSE_RIGHT);
+    delay(mouse_press_delay);
+    Keyboard.press(Z_key);
+    delay(key_press_delay);
+    Keyboard.release(Z_key);
+}
+
