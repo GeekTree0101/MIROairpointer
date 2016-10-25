@@ -15,7 +15,7 @@
 
 //#define BUTTON_IO PORTB
 //#define BUTTON_DIR DDRB
-
+#define MPU 0x68
 //Function area
 
 void Button_setup();
@@ -27,7 +27,7 @@ void MPU_action_control(int16_t* value_array);
 //Setup
 
 void setup(){
-
+    Serial.begin(9600);
     Button_setup();
     MPU_setup();
     Mouse_interface_setup();
@@ -41,18 +41,18 @@ void loop(){
     //XXX : Must import Low Battery System Cuz, overhead very big in this loop
     int16_t Gyro_value[2] = {0,0};
 
-    Wire.beginTransmission(0x68);         //Begin MPU
+    Wire.beginTransmission(MPU);         //Begin MPU
     Wire.write(0x3B);
     Wire.endTransmission(false);             //Sustain connection
-    Wire.requestFrom(0x68, 14, true);
+    Wire.requestFrom(MPU, 14, true);
 
-    int16_t accX = Wire.read() << 8 | Wire.read();  // X pos data
-    int16_t accY = Wire.read() << 8 | Wire.read();  // Y pos data
-    int16_t accZ = Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-    int16_t tmp = Wire.read()<<8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-    Gyro_value[0] = Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
-    Gyro_value[1] = Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
-    int16_t gyro_z =Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+    int16_t accX = Wire.read() << 8|Wire.read();  // X pos data
+    int16_t accY = Wire.read() << 8|Wire.read();  // Y pos data
+    int16_t accZ = Wire.read() << 8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+    int16_t tmp = Wire.read() << 8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+    Gyro_value[0] = Wire.read() << 8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
+    Gyro_value[1] = Wire.read() << 8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
+    int16_t gyro_z =Wire.read() << 8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
   
     MPU_action_control(Gyro_value);
 
@@ -65,6 +65,11 @@ void loop(){
 
         int X = 10;
         int Y = 10;
+
+        Serial.print(X);
+        Serial.print("|");
+        Serial.print(Y);
+        Serial.println("*");
 
         if(Gyro_value[0] > 0){
 
@@ -101,7 +106,7 @@ void Button_setup(){                        //Pull-up Digital Button;
 void MPU_setup(){                           //MPU6050 Init Setup
 
     Wire.begin();
-    Wire.beginTransmission(0x68);
+    Wire.beginTransmission(MPU);
     Wire.write(0x6B);
     Wire.write(0);
     Wire.endTransmission(true);
