@@ -1,11 +1,12 @@
+#include <Wire.h>
+
+
 /*
     MIRO airpointer project
     Copyright(C) 2016 MIRO
     provider : GeekTree0101
     update : 2016.10.24s
 */
-//#include "Arduino.h"
-#include <Wire.h>
 #include <Mouse.h>
 #include <Keyboard.h>
 #include <MPU6050.h>
@@ -15,7 +16,7 @@
 
 //#define BUTTON_IO PORTB
 //#define BUTTON_DIR DDRB
-#define MPU 0x68
+boolean flag = false;
 //Function area
 
 void Button_setup();
@@ -26,7 +27,7 @@ void Keyboard_interface_setup();
 //Setup
 
 void setup(){
-    Serial.begin(9600);
+
     Button_setup();
     MPU_setup();
     Mouse_interface_setup();
@@ -38,53 +39,67 @@ void setup(){
 void loop(){
 
     //XXX : Must import Low Battery System Cuz, overhead very big in this loop
-    int16_t Gyro_value[2] = {0,0};
-
-    Wire.beginTransmission(MPU);         //Begin MPU
-    Wire.write(0x3B);
-    Wire.endTransmission(false);             //Sustain connection
-    Wire.requestFrom(MPU, 14, true);
-
-    int16_t accX = Wire.read() << 8|Wire.read();  // X pos data
-    int16_t accY = Wire.read() << 8|Wire.read();  // Y pos data
-    int16_t accZ = Wire.read() << 8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-    int16_t tmp = Wire.read() << 8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-    Gyro_value[0] = Wire.read() << 8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
-    Gyro_value[1] = Wire.read() << 8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
-    int16_t gyro_z =Wire.read() << 8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
-  
-
-    if(digitalRead(8) == LOW){              //Button Click
-
-        Mouse.click(MOUSE_LEFT);
-    }
-
-    if(digitalRead(9) == LOW){              //Gyro action
-
-        int X = 10;
-        int Y = 10;
-
-        Serial.print(Gyro_value[0]);
-        Serial.print("|");
-        Serial.print(Gyro_value[1]);
-        Serial.println("*");
-
-        if(Gyro_value[0] > 0){
-
-            X = -10;
-        }
-
-        if(Gyro_value[1] > 0){
-
-            Y = -10;
-        }
-
-        Mouse.move(X,Y,0);
-    }
-
-    delay(100);
+    int16_t* Acc_value;
+    Acc_value = (int16_t*)malloc(6*sizeof(int16_t));
     
 
+    while(1){
+    
+        Wire.beginTransmission(0x68);         //Begin MPU
+        Wire.write(0x3B);
+        Wire.endTransmission(false);             //Sustain connection
+        Wire.requestFrom(0x68, 14, true);
+
+        Acc_value[0] = Wire.read() << 8 | Wire.read();  // X pos data
+        Acc_value[1] = Wire.read() << 8 | Wire.read();  // Y pos data
+        Acc_value[2] = Wire.read() << 8 | Wire.read();
+        Acc_value[3] = Wire.read() << 8 | Wire.read();
+        Acc_value[4] = Wire.read() << 8 | Wire.read();  // z acc
+        Acc_value[5] = Wire.read() << 8 | Wire.read();  //
+
+        Serial.print(Acc_value[0]);
+        Serial.print("\t");
+        Serial.print(Acc_value[1]);
+        Serial.print("\t");
+        Serial.print(Acc_value[2]);
+        Serial.print("\t");
+        Serial.print(Acc_value[3]);
+        Serial.print("\t");
+        Serial.print(Acc_value[4]);
+        Serial.print("\t");
+        Serial.println(Acc_value[5]);
+        
+        if(digitalRead(8) == LOW){              //Button Click
+
+            Mouse.click(MOUSE_LEFT);
+        }
+
+        if(digitalRead(9) == LOW){              //Gyro action
+            int X = 0;
+            int Y = 0;
+            if(Acc_value[0] > 10000){
+              X = 5;
+            }
+            else if(Acc_value[0] < -10000){
+              X = -5;
+            }
+            
+            if(Acc_value[1] > 10000){
+              Y = -5;
+            }
+            else if(Acc_value[1] < -10000){
+              Y = 5;
+            }            
+
+
+            Mouse.move(X,Y,0);   
+        }
+
+        delay(50);
+    }
+
+
+    free(Acc_value);
 }
 
 
@@ -104,7 +119,7 @@ void Button_setup(){                        //Pull-up Digital Button;
 void MPU_setup(){                           //MPU6050 Init Setup
 
     Wire.begin();
-    Wire.beginTransmission(MPU);
+    Wire.beginTransmission(0x68);
     Wire.write(0x6B);
     Wire.write(0);
     Wire.endTransmission(true);
@@ -122,4 +137,3 @@ void Keyboard_interface_setup(){            //Keyboard Init Setup
     Keyboard.begin();
     delay(30);
 }
-
