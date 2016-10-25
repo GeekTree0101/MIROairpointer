@@ -64,9 +64,9 @@ void loop(){
         int X = 10;
         int Y = 10;
 
-        Serial.print(X);
+        Serial.print(Gyro_value[0]);
         Serial.print("|");
-        Serial.print(Y);
+        Serial.print(Gyro_value[1]);
         Serial.println("*");
 
         if(Gyro_value[0] > 0){
