@@ -22,7 +22,6 @@ void Button_setup();
 void MPU_setup();
 void Mouse_interface_setup();
 void Keyboard_interface_setup();
-void MPU_action_control(int16_t* value_array);
 
 //Setup
 
@@ -54,7 +53,6 @@ void loop(){
     Gyro_value[1] = Wire.read() << 8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
     int16_t gyro_z =Wire.read() << 8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
   
-    MPU_action_control(Gyro_value);
 
     if(digitalRead(8) == LOW){              //Button Click
 
