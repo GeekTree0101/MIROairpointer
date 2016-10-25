@@ -1,4 +1,3 @@
-#include <Wire.h>
 
 
 /*
@@ -7,6 +6,7 @@
     provider : GeekTree0101
     update : 2016.10.24s
 */
+#include <Wire.h>
 #include <Mouse.h>
 #include <Keyboard.h>
 #include <MPU6050.h>
@@ -56,46 +56,71 @@ void loop(){
         Acc_value[3] = Wire.read() << 8 | Wire.read();
         Acc_value[4] = Wire.read() << 8 | Wire.read();  // z acc
         Acc_value[5] = Wire.read() << 8 | Wire.read();  //
-
-        Serial.print(Acc_value[0]);
-        Serial.print("\t");
-        Serial.print(Acc_value[1]);
-        Serial.print("\t");
-        Serial.print(Acc_value[2]);
-        Serial.print("\t");
-        Serial.print(Acc_value[3]);
-        Serial.print("\t");
-        Serial.print(Acc_value[4]);
-        Serial.print("\t");
-        Serial.println(Acc_value[5]);
         
         if(digitalRead(8) == LOW){              //Button Click
 
             Mouse.click(MOUSE_LEFT);
+            delay(500);
         }
 
-        if(digitalRead(9) == LOW){              //Gyro action
+        if(digitalRead(7) == LOW){
+           Mouse.click(MOUSE_RIGHT);
+           delay(80);
+           Keyboard.press(79);
+           delay(30);
+           Keyboard.release(79);          
+           delay(30);
+           Keyboard.press(72);
+           delay(30);
+           Keyboard.release(72);  
+
+           if(flag){
+            flag = false;
+           }
+           else{
+            flag = true;
+           }
+           delay(1000);
+        }
+
+        if(digitalRead(9) == LOW){
+
+           Mouse.click(MOUSE_RIGHT);
+           delay(80);
+           Keyboard.press(122);
+           delay(30);
+           Keyboard.release(122);
+        }
+
+        if(digitalRead(10) == LOW){              //Gyro action
             int X = 0;
             int Y = 0;
-            if(Acc_value[0] > 10000){
-              X = 5;
-            }
+            
+            if(Acc_value[0] > 10000){                      //left right
+              X = 5 + (Acc_value[0] % 10000) / 1000;
+            } 
             else if(Acc_value[0] < -10000){
-              X = -5;
+              X = -5 + (Acc_value[0] % 10000) / 1000;
             }
             
-            if(Acc_value[1] > 10000){
-              Y = -5;
+            if(Acc_value[1] > 10000){                       // up down
+               Y = 5 + (Acc_value[1] % 10000) / 1000;
             }
             else if(Acc_value[1] < -10000){
-              Y = 5;
+              Y = -5 + (Acc_value[1] % 10000) / 1000;
             }            
 
-
+            Serial.print(X);
+            Serial.print("|");
+            Serial.print(Y);
+            Serial.println("");
+            if(flag){
+              Mouse.click(MOUSE_LEFT);
+            }
             Mouse.move(X,Y,0);   
         }
 
-        delay(50);
+        delay(10);
     }
 
 
@@ -107,12 +132,15 @@ void loop(){
 void Button_setup(){                        //Pull-up Digital Button;
 
     //XXX : Must script base on DDR, PORT register
-
+    pinMode(7,INPUT);
     pinMode(8,INPUT);
     pinMode(9,INPUT);
+    pinMode(10,INPUT);
 
+    digitalWrite(7,HIGH);
     digitalWrite(8,HIGH);
     digitalWrite(9,HIGH);
+    digitalWrite(10,HIGH);
 }
 
 
