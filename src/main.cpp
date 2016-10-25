@@ -78,7 +78,7 @@ void loop(){
 
         if(Gyro_value[1] > 0){
 
-            Y = 10;
+            Y = -10;
         }
 
         Mouse.move(X,Y,0);
