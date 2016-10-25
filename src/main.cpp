@@ -39,37 +39,49 @@ void setup(){
 void loop(){
 
     //XXX : Must import Low Battery System Cuz, overhead very big in this loop
-    int16_t* Acc_value;
-    Acc_value = (int16_t*)malloc(2*sizeof(int16_t));
-    
+    int16_t Gyro_value[2] = {0,0};
 
-    while(1){
-    
-        Wire.beginTransmission(0x68);         //Begin MPU
-        Wire.write(0x3B);
-        Wire.endTransmission(false);             //Sustain connection
-        Wire.requestFrom(0x68, 14, true);
+    Wire.beginTransmission(0x68);         //Begin MPU
+    Wire.write(0x3B);
+    Wire.endTransmission(false);             //Sustain connection
+    Wire.requestFrom(0x68, 14, true);
 
-        Acc_value[0] = Wire.read() << 8 | Wire.read();  // X pos data
-        Acc_value[1] = Wire.read() << 8 | Wire.read();  // Y pos data
+    int16_t accX = Wire.read() << 8 | Wire.read();  // X pos data
+    int16_t accY = Wire.read() << 8 | Wire.read();  // Y pos data
+    int16_t accZ = Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+    int16_t tmp = Wire.read()<<8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+    Gyro_value[0] = Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
+    Gyro_value[1] = Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
+    int16_t gyro_z =Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+  
+    MPU_action_control(Gyro_value);
 
-        MPU_action_control(Acc_value);
+    if(digitalRead(8) == LOW){              //Button Click
 
-        if(digitalRead(8) == LOW){              //Button Click
-
-            Mouse.click(MOUSE_LEFT);
-        }
-
-        if(digitalRead(9) == LOW){              //Gyro action
-
-            Mouse.move(Acc_value[0],Acc_value[1],0);
-        }
-
-        delay(100);
+        Mouse.click(MOUSE_LEFT);
     }
 
+    if(digitalRead(9) == LOW){              //Gyro action
 
-    free(Acc_value);
+        int X = 10;
+        int Y = 10;
+
+        if(Gyro_value[0] > 0){
+
+            X = -10;
+        }
+
+        if(Gyro_value[1] > 0){
+
+            Y = 10;
+        }
+
+        Mouse.move(X,Y,0);
+    }
+
+    delay(100);
+    
+
 }
 
 
@@ -108,12 +120,3 @@ void Keyboard_interface_setup(){            //Keyboard Init Setup
     delay(30);
 }
 
-
-void MPU_action_control(int16_t* value_array){                  //mouse pointer core
-
-
-    // Must script algorythm under O(n) 
-
-
-
-}
