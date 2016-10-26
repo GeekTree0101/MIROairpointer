@@ -3,7 +3,7 @@
     Title : MIRO airpointer project
     Copyright(C) 2016 MIRO KyongPook Univ
      
-    하현수, 박민규, 이재훈, 황인득, 이동은
+    하현수, 박민규, 황인득,  이재훈, 이동은
     update : 2016.10.25 23:58
 
 ***********************************/
