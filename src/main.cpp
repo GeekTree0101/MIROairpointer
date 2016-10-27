@@ -1,18 +1,14 @@
 /***********************************
-
     Title : MIRO airpointer project
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
     update : 2016.10.25 23:58
-
 ***********************************/
 
 /**********************************
-
        [+] Import Library
-
-**********************************/fggfgf
+**********************************/
 
 #include <Wire.h>
 #include <Mouse.h>
@@ -20,9 +16,7 @@
 #include <MPU6050.h>
 
 /**********************************
-
     [+] Global & Const Variables
-
 **********************************/
 
 #define BUTTON_IO PORTB                 //Button Bport I/O Register
@@ -44,9 +38,7 @@
 boolean flag = false;                   //Drawing Flag
 
 /**********************************
-
         [+] Function
-
 ***********************************/
 
 void Button_setup();                    //Pull-up Digital Button
@@ -225,4 +217,3 @@ void ZoomIn_event(){                       //Zoomin event Function
     delay(key_press_delay);
     Keyboard.release(Z_key);
 }
-
