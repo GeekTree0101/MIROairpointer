@@ -1,4 +1,3 @@
-
 /***********************************
     Title : MIRO airpointer project
     Copyright(C) 2016 MIRO KyongPook Univ
@@ -14,7 +13,6 @@
 #include <Wire.h>
 #include <Mouse.h>
 #include <Keyboard.h>
-#include <MPU6050.h>
 /**********************************
     [+] Global & Const Variables
 **********************************/
@@ -54,36 +52,15 @@ short Check_Y(int Data);
 
 void setup(){                               //Hardware Setup
 
+    Serial.begin(9600);
     Button_setup();
-    MPU_setup();
     Mouse_interface_setup();
     Keyboard_interface_setup();
 }
 
 void loop(){                                //Main Loop Proc
 
-    //XXX : Must import Low Battery System Cuz, overhead very big in this loop
-    
-    int16_t* Data_Stack;
-    unsigned long currentMillis = millis();
-    Data_Stack = (int16_t*)malloc(7*sizeof(int16_t));
-    
-
-    while(1){
-    
-        Wire.beginTransmission(0x68);         //Begin MPU
-        Wire.write(0x3B);
-        Wire.endTransmission(false);             //Sustain connection
-        Wire.requestFrom(0x68, 14, true);
-
-        Data_Stack[0] = Wire.read() << 8 | Wire.read();  // X acc data
-        Data_Stack[1] = Wire.read() << 8 | Wire.read();  // Y acc data
-        Data_Stack[2] = Wire.read() << 8 | Wire.read();   // Z acc data
-        Data_Stack[3] = Wire.read() << 8 | Wire.read();   // Temp
-        Data_Stack[4] = Wire.read() << 8 | Wire.read();   // X gyro data select
-        Data_Stack[5] = Wire.read() << 8 | Wire.read();   // Y gyro data
-        Data_Stack[6] = Wire.read() << 8 | Wire.read();   // Z gyro data select
-
+ 
         
         if(digitalRead(Click_button) == LOW){              //Click Function
 
@@ -176,11 +153,7 @@ void loop(){                                //Main Loop Proc
         }
 
         delay(Hardware_delay);                            // Loop-Proc delay time
-    }
 
-
-    free(Data_Stack);                                     // Data-Stack memory free
-    currentMillis = 0;
 }
 
 

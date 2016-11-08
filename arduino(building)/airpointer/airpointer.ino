@@ -1,4 +1,3 @@
-
 /***********************************
     Title : MIRO airpointer project
     Copyright(C) 2016 MIRO KyongPook Univ
@@ -54,6 +53,7 @@ short Check_Y(int Data);
 
 void setup(){                               //Hardware Setup
 
+    Serial.begin(9600);
     Button_setup();
     MPU_setup();
     Mouse_interface_setup();
