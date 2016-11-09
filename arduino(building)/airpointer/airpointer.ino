@@ -3,7 +3,7 @@
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
-    update : 2016.10.25 23:58
+    update : 2016.11.09. 14:33
 ***********************************/
 
 /**********************************
@@ -11,27 +11,22 @@
 **********************************/
 
 #include <Wire.h>
-#include <Mouse.h>
-#include <Keyboard.h>
 #include <MPU6050.h>
 /**********************************
     [+] Global & Const Variables
 **********************************/
 
-#define BUTTON_IO PORTB                 //Button Bport I/O Register
-#define BUTTON_DIR DDRB                 //Button Bport DIR Register
-
 #define Drawing_button 7                //Button Pin (PULL-UP Button)
 #define Click_button 8
 #define ZoomIn_button 9
 #define Motion_button 10
+#define Lazer_button 11
 
 #define key_press_delay 30              //key & Mouse Motion delay time
 #define mouse_press_delay 50
 #define Hardware_delay 10               //Hardware Delay
 
-boolean Drawing_flag = false;                   //Drawing Flag
-boolean Zoom_flag = false;                      //Zoom Flag
+
 
 /**********************************
         [+] Function
@@ -39,25 +34,15 @@ boolean Zoom_flag = false;                      //Zoom Flag
 
 void Button_setup();                    //Pull-up Digital Button
 void MPU_setup();                       //MPU6050 Init Setup
-void Mouse_interface_setup();           //Mouse Init Setup
-void Keyboard_interface_setup();        //Keyboard Init Setup
-void Click_event();                     //Click event Function
-void ZoomIn_event();                    //Zoomin event Function
-void ZoomIn_start();
-void ZoomIn_cancel();
-void Drawing_event();                  //Drawing event Function
-void Drawing_start();
-void Drawing_cancel();
-short Check_X(int Data);
-short Check_Y(int Data);
+short Check_X(int Data);                //Calculate X position
+short Check_Y(int Data);                //Calculate Y position
+
 
 void setup(){                               //Hardware Setup
 
-    Serial.begin(9600);
+    Serial.begin(9600);                     //bluetooth serial 9600 baudrate
     Button_setup();
     MPU_setup();
-    Mouse_interface_setup();
-    Keyboard_interface_setup();
 }
 
 void loop(){                                //Main Loop Proc
@@ -70,7 +55,10 @@ void loop(){                                //Main Loop Proc
     
 
     while(1){
-    
+
+        short X = 0;
+        short Y = 0;
+
         Wire.beginTransmission(0x68);         //Begin MPU
         Wire.write(0x3B);
         Wire.endTransmission(false);             //Sustain connection
@@ -84,100 +72,59 @@ void loop(){                                //Main Loop Proc
         Data_Stack[5] = Wire.read() << 8 | Wire.read();   // Y gyro data
         Data_Stack[6] = Wire.read() << 8 | Wire.read();   // Z gyro data select
 
+        X = Check_X(Data_Stack[6]);
+        Y = Check_Y(Data_Stack[4]);
         
         if(digitalRead(Click_button) == LOW){              //Click Function
 
-            Click_event();
+            Serial.print(0);
+            Serial.print('/');
+            Seiral.print(X);
+            Serial.print('/');
+            Serial.println(Y);        
         }
 
         if(digitalRead(Drawing_button) == LOW){
-          delay(300);
-          Drawing_event();
-          if(Drawing_flag==true)
-             Drawing_start();
-          else
-             Drawing_cancel();
-        }
-
-
-        if(Drawing_flag==true){            //Drawing Function
-            
-            Keyboard.releaseAll();
-            
-            if(Zoom_flag == false) {
-       
-                short X = 0;
-                short Y = 0;
-                
-                X = Check_X(Data_Stack[6]);
-                Y = Check_Y(Data_Stack[4]);
-                
-                Mouse.move(X,Y,0);
-
-            }
-
+          
+            Serial.print(1;
+            Serial.print("/");
+            Seiral.print(X);
+            Serial.print("/");
+            Serial.println(Y);       
         }
 
         if(digitalRead(ZoomIn_button) == LOW){             //ZoomIn Function
-            delay(300);
-            ZoomIn_event();
-            if(Zoom_flag==true)
-                ZoomIn_start();
-             else {
-                ZoomIn_cancel();
-             }
-          }
 
-           if(Zoom_flag==true) {
+            Serial.print(2);
+            Serial.print('/');
+            Seiral.print(X);
+            Serial.print('/');
+            Serial.println(Y);        
+        }
 
-              Keyboard.releaseAll();
-
-                short X = 0;
-                short Y = 0;
-                
-                X = Check_X(Data_Stack[6]);
-                Y = Check_Y(Data_Stack[4]);
-                
-                Mouse.move(X,Y,0);
-                
-            }
-            
 
         if(digitalRead(Motion_button) == LOW){              //Motion Control
             
-            //TODO : Don't make it as Function
-            //       Due to OverHead during make a new stack on the memory
 
-            if(Drawing_flag==true){
-              Mouse.press(MOUSE_LEFT);
-            }
-            else if(Zoom_flag==true) {
-              Mouse.press(MOUSE_LEFT);
-              }
-            else if(Drawing_flag==true && Zoom_flag==true) {
-              Keyboard.releaseAll();
-              Mouse.release(MOUSE_ALL);
-              }
- 
-            short X = 0;
-            short Y = 0;
-            
-            X = Check_X(Data_Stack[6]);
-            Y = Check_Y(Data_Stack[4]);
-            
-            Mouse.move(X,Y,0);                            // Mouse Pointer moving method
-            
+            Serial.print(3);
+            Serial.print('/');
+            Seiral.print(X);
+            Serial.print('/');
+            Serial.println(Y);
+            digitalWrite(Lazer_button, HIGH);        
         }
         else{
-          if(Drawing_flag==true)
-              Mouse.release(MOUSE_LEFT);
-          else if(Zoom_flag==true)
-              Mouse.release(MOUSE_LEFT);
+
+            Serial.print(4);
+            Serial.print('/');
+            Seiral.print(X);
+            Serial.print('/');
+            Serial.println(Y);        
+            digitalWrite(Lazer_button, LOW);
         }
 
         delay(Hardware_delay);                            // Loop-Proc delay time
     }
-
 
     free(Data_Stack);                                     // Data-Stack memory free
     currentMillis = 0;
@@ -191,6 +138,7 @@ void Button_setup(){                        //Pull-up Digital Button;
     pinMode(Click_button ,INPUT);
     pinMode(ZoomIn_button,INPUT);
     pinMode(Motion_button,INPUT);
+    pinMode(Lazer_button,OUTPUT);
 
     digitalWrite(Drawing_button,HIGH);
     digitalWrite(Click_button ,HIGH);
@@ -208,131 +156,60 @@ void MPU_setup(){                           //MPU6050 Init Setup
     delay(30);
 }
 
-void Mouse_interface_setup(){               //Mouse Init Setup
-
-    Mouse.begin();
-    delay(30);
-}
-
-void Keyboard_interface_setup(){            //Keyboard Init Setup
-
-    Keyboard.begin();
-    delay(30);
-}
-
-void Click_event(){                         //Click event Function
-
-    Mouse.click(MOUSE_LEFT);
-    delay(500);
-}
-
-void Drawing_event(){                       //Drawing event Function
-
-  if(Drawing_flag==true) {
-    Drawing_flag = false;
-    }
-  else if(Drawing_flag==false && Zoom_flag==false) {
-    Drawing_flag = true;
-  }  
-}
-
-void Drawing_start() {
-  
-    Keyboard.press(KEY_LEFT_CTRL);
-    delay(key_press_delay);
-    Keyboard.press('p');
-    delay(key_press_delay);
-    Keyboard.release('p');
-    delay(key_press_delay);
-    Keyboard.release(KEY_LEFT_CTRL);
-    delay(key_press_delay);
-    
-    delay(30);
-  }
-
-void Drawing_cancel() {
-  
-    Keyboard.press(KEY_LEFT_CTRL);
-    delay(key_press_delay);
-    Keyboard.press('a');
-    delay(key_press_delay);
-    Keyboard.release('a');
-    delay(key_press_delay);
-    Keyboard.release(KEY_LEFT_CTRL);
-    delay(key_press_delay);
-
-    delay(30);
-}
-
-void ZoomIn_event() {
-
-  if(Zoom_flag) {
-    Zoom_flag = false;
-    }
-  else {
-    Zoom_flag = true;
-  }  
-  
-}
-
-
-void ZoomIn_start(){                       //Zoomin event Function
-
-     Keyboard.press(KEY_LEFT_CTRL);
-     delay(key_press_delay);
-     Mouse.move(0,0,3);
-     delay(key_press_delay);
-     Keyboard.release(KEY_LEFT_CTRL);
-     
-}
-
-void ZoomIn_cancel() {
-    Keyboard.write(0x30);
-    delay(key_press_delay);
-    
-  }
-
 short Check_X(int Data) {
+
             short Xval;  
 
             if(Data > 1000) {
+
               Xval = -2-Data / 1000;
-              }
+            }
             else if( Data < -1000) {
+            
               Xval = 2-Data / 1000;
-              }
+            }
             else if(Data > 500 && Data < 1000)  {                
-                Xval = -3;               
-              }
-             else if(Data > -1000 && Data < -500) {
-                Xval = 3;
-              }
-             else {
-                Xval = 0;
-              }
+              
+              Xval = -3;               
+            }
+            else if(Data > -1000 && Data < -500) {
+              
+              Xval = 3;
+            }
+            else {
+                
+              Xval = 0;
+            }
             
 
-              return Xval;
-  }
+            return Xval;
+}
+
 
 short Check_Y(int Data) {
+  
             short Yval;
 
             if(Data > 1000) {
+            
               Yval = Data / 1000;
-              }
+            }
             else if(Data < -1000){
+            
               Yval = Data / 1000;
-              }
+            }
             else if(Data > 500 && Data < 1000)  {                
-                Yval = 1;               
-              }
-             else if(Data > -1000 && Data < -500) {
+              
+              Yval = 1;               
+            }
+            else if(Data > -1000 && Data < -500) {
+                
                 Yval = -1;
-              }
-             else {
+             }
+            else {
+                
                 Yval = 0;
-              }
+            }
 
             return Yval;
-  }
+ }
