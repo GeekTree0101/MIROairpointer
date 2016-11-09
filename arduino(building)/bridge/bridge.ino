@@ -29,7 +29,7 @@
 boolean Drawing_flag = false;                   //Drawing Flag
 boolean Zoom_flag = false;                      //Zoom Flag
 
-
+String inputString = "";
 boolean stringComplete = false;  // whether the string is complete
 unsigned int function_state = 99;
 short X = 0;
@@ -63,12 +63,12 @@ void loop(){                                //Main Loop Proc
   if (stringComplete) {
 
         
-        if(digitalRead(Click_button) == LOW){              //Click Function
+        if(function_state == CLICK_BUTTON){              //Click Function
 
             Click_event();
         }
 
-        if(digitalRead(Drawing_button) == LOW){
+        if(function_state == DRAWING_BUTTON){
           delay(300);
           Drawing_event();
           if(Drawing_flag==true)
@@ -89,7 +89,7 @@ void loop(){                                //Main Loop Proc
 
         }
 
-        if(digitalRead(ZoomIn_button) == LOW){             //ZoomIn Function
+        if(function_state == ZOOMIN_BUTTON){             //ZoomIn Function
             
             delay(300);
             ZoomIn_event();
@@ -109,7 +109,7 @@ void loop(){                                //Main Loop Proc
                 
         }
             
-        if(digitalRead(Motion_button) == LOW){              //Motion Control
+        if(function_state == MOTION_BUTTON){              //Motion Control
             
 
           if(Drawing_flag==true){
@@ -162,7 +162,7 @@ void serialEvent() {
 
   while (Serial.available()) {
 
-    if(integer_value){
+    if(data_type_toggle){
 
       int temp = (int)Serial.read();   // 0 -> 234 -> 23
 
@@ -191,7 +191,7 @@ void serialEvent() {
       }
       else{                                    //end serial line \n
         count = 0;
-        stringComplate = true;
+        stringComplete  = true;
       }
 
     }
