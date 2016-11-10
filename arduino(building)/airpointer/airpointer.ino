@@ -12,6 +12,9 @@
 
 #include <Wire.h>
 #include <MPU6050.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial BT = SoftwareSerial(0,1);
 /**********************************
     [+] Global & Const Variables
 **********************************/
@@ -40,7 +43,8 @@ short Check_Y(int Data);                //Calculate Y position
 
 void setup(){                               //Hardware Setup
 
-    Serial.begin(9600);                     //bluetooth serial 9600 baudrate
+    //FIXME: 블루투스 Baudrate설정 재검토 필요 및 펌테크 인터페이스로 내부수정필요
+    BT.begin(9600);                     //bluetooth serial 9600 baudrate
     Button_setup();
     MPU_setup();
 }
@@ -77,49 +81,49 @@ void loop(){                                //Main Loop Proc
         
         if(digitalRead(Click_button) == LOW){              //Click Function
 
-            Serial.print(0);
-            Serial.print('/');
-            Seiral.print(X);
-            Serial.print('/');
-            Serial.println(Y);        
+            BT.print(0);
+            BT.print('/');
+            BT.print(X);
+            BT.print('/');
+            BT.println(Y);        
         }
 
         if(digitalRead(Drawing_button) == LOW){
           
-            Serial.print(1;
-            Serial.print("/");
-            Seiral.print(X);
-            Serial.print("/");
-            Serial.println(Y);       
+            BT.print(1);
+            BT.print("/");
+            BT.print(X);
+            BT.print("/");
+            BT.println(Y);       
         }
 
         if(digitalRead(ZoomIn_button) == LOW){             //ZoomIn Function
 
-            Serial.print(2);
-            Serial.print('/');
-            Seiral.print(X);
-            Serial.print('/');
-            Serial.println(Y);        
+            BT.print(2);
+            BT.print('/');
+            BT.print(X);
+            BT.print('/');
+            BT.println(Y);        
         }
 
 
         if(digitalRead(Motion_button) == LOW){              //Motion Control
             
 
-            Serial.print(3);
-            Serial.print('/');
-            Seiral.print(X);
-            Serial.print('/');
-            Serial.println(Y);
+            BT.print(3);
+            BT.print('/');
+            BT.print(X);
+            BT.print('/');
+            BT.println(Y);
             digitalWrite(Lazer_button, HIGH);        
         }
         else{
 
-            Serial.print(4);
-            Serial.print('/');
-            Seiral.print(X);
-            Serial.print('/');
-            Serial.println(Y);        
+            BT.print(4);
+            BT.print('/');
+            BT.print(X);
+            BT.print('/');
+            BT.println(Y);        
             digitalWrite(Lazer_button, LOW);
         }
 
