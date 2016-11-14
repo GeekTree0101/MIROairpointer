@@ -14,7 +14,6 @@
 #include <Keyboard.h>
 #include <SoftwareSerial.h>
 
-SoftwareSerial BT = SoftwareSerial(0,1);
 /**********************************
     [+] Global & Const Variables
 **********************************/
@@ -55,7 +54,7 @@ void Drawing_cancel();
 
 void setup(){                               //Hardware Setup
     //FIXME : 블루투스 Baudrate설정 재검토 필요 및 펌테크 인터페이스로 내부수정필요
-    BT.begin(9600);
+    Serial1.begin(9600);
     inputString.reserve(200);
     Mouse_interface_setup();
     Keyboard_interface_setup();
@@ -163,11 +162,11 @@ void serialEvent() {
 
   //example 0/234/23\n
 
-  while (BT.available()) {
+  while (Serial1.available()) {
 
     if(data_type_toggle){
 
-      int temp = (int)BT.read();   // 0 -> 234 -> 23
+      int temp = (int)Serial1.read();   // 0 -> 234 -> 23
 
       if(count == 0){
         
@@ -185,7 +184,7 @@ void serialEvent() {
     }
     else{
 
-      char temp = (char)BT.read();  // / -> / -> \n
+      char temp = (char)Serial1.read();  // / -> / -> \n
       
       if(temp == '/'){
  
