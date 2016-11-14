@@ -188,8 +188,7 @@ void serialEvent() {
       char temp = (char)BT.read();  // / -> / -> \n
       
       if(temp == '/'){
-        
-        count++;
+ 
         data_type_toggle = true;
       }
       else{                                    //end serial line \n
