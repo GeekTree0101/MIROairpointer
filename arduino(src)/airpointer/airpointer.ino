@@ -82,17 +82,6 @@ void loop(){                                //Main Loop Proc
         X = Check_X(Data_Stack[6]);
         Y = Check_Y(Data_Stack[4]);
         
-        if( drawing_flag == true || zoomin_flag == true ){
-
-            Serial1.print(7);
-            Serial1.print('/');
-            Serial1.print(X);
-            Serial1.print('/');
-            Serial1.print(Y);
-            Serial1.print('/');
-            Serial1.print('&');
-
-        }
 
         if(digitalRead(Click_button) == LOW){              //Click Function
             
@@ -149,7 +138,20 @@ void loop(){                                //Main Loop Proc
             Serial1.print('&');
                   
         }
+        else{
+        
+            if( drawing_flag == true || zoomin_flag == true ){
 
+                Serial1.print(7);
+                Serial1.print('/');
+                Serial1.print(X);
+                Serial1.print('/');
+                Serial1.print(Y);
+                Serial1.print('/');
+                Serial1.print('&');
+
+            }
+        }
     }
   
     free(Data_Stack);                                     // Data-Stack memory free
