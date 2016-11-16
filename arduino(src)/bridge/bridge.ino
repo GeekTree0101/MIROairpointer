@@ -3,7 +3,7 @@
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
-    update : 2016.11.15 22:05
+    update : 2016.11.16 15:44
 ***********************************/
 
 
@@ -14,7 +14,6 @@
 #include <Mouse.h>
 #include <Keyboard.h>
 #include <unistd.h>
-
 
 /**********************************
     [+] Global & Const Variables
@@ -32,13 +31,11 @@
 
 boolean Drawing_flag = false;                   //Drawing Flag
 boolean Zoom_flag = false;                      //Zoom Flag
-
-boolean stringComplete = false;  // whether the string is complete
+boolean Serial_control_flag = false;            //recved serial data control flag
 
 unsigned int function_state = 99;
 short X = 0;
 short Y = 0;
-
 
 /**********************************
         [+] Function
@@ -54,6 +51,8 @@ void Drawing_cancel();
 void Drawing_event();
 
 void setup(){                               //Hardware Setup
+
+    //NOTE : arduino micro(atmega32u4) using Serial1 
     Serial1.begin(9600);
     Mouse_interface_setup();
     Keyboard_interface_setup();
@@ -75,7 +74,7 @@ void loop(){                                //Main Loop Proc
             if(buff == '&'){                    //exit
                 
               digitalWrite(5,LOW);
-              stringComplete = true;
+              Serial_control_flag = true;
               break;
             }
             else if(buff == '/'){                    //slash
@@ -115,7 +114,7 @@ void loop(){                                //Main Loop Proc
     }                                  //available endif
 
     
-    if (stringComplete) {
+    if (Serial_control_flag) {
         
         switch(function_state){
 
@@ -188,13 +187,20 @@ void loop(){                                //Main Loop Proc
 void Drawing_event(){                       //Drawing event Function
 
   if(!Zoom_flag){
-    Drawing_flag ~= Drawing_flag; 
+    Drawing_flag != Drawing_flag; 
   }
 
 }
 
+void ZoomIn_event() {                     //Zoomin function toggling
+  
+  if(!Drawing_flag){
+     Zoom_flag != Zoom_flag;
+  }
+  
+}
 
-void Drawing_start() {
+void Drawing_start() {                   //Drawing start function
   
     Keyboard.press(KEY_LEFT_CTRL);
     delay(key_press_delay);
@@ -206,9 +212,10 @@ void Drawing_start() {
     delay(key_press_delay);
     
     delay(30);
-  }
+}
 
-void Drawing_cancel() {
+
+void Drawing_cancel() {                  //Drawing cancel function
   
     Keyboard.press(KEY_LEFT_CTRL);
     delay(key_press_delay);
@@ -220,14 +227,6 @@ void Drawing_cancel() {
     delay(key_press_delay);
 
     delay(30);
-}
-
-void ZoomIn_event() {
-  
-  if(!Drawing_flag){
-     Zoom_flag ~= Zoom_flag;
-  }
-  
 }
 
 void ZoomIn_start(){                       //Zoomin event Function
@@ -244,7 +243,6 @@ void ZoomIn_cancel() {
     Keyboard.write(0x30);
     delay(key_press_delay);
 }
-
 
 void Mouse_interface_setup(){               //Mouse Init Setup
 
