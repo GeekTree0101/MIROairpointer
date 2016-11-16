@@ -12,6 +12,7 @@
 
 #include <Wire.h>
 #include <MPU6050.h>
+#include <stdio.h>
 /**********************************
     [+] Global & Const Variables
 **********************************/
@@ -65,6 +66,7 @@ void loop(){                                //Main Loop Proc
         
         short X = 0;
         short Y = 0;
+        char buff[7];
 
         Wire.beginTransmission(0x68);         //Begin MPU
         Wire.write(0x3B);
@@ -84,29 +86,19 @@ void loop(){                                //Main Loop Proc
         
 
         if(digitalRead(Click_button) == LOW){              //Click Function
-            
-            Serial1.print(4);
-            Serial1.print('/');
-            Serial1.print(X);
-            Serial1.print('/');
-            Serial1.print(Y);
-            Serial1.print('/');
-            Serial1.print('&');    
 
+            sprintf(buff, "%d/%d/%d/&", 4,X,Y)
+            Serial1.print(buff); 
+            
             zoomin_flag = ~zoomin_flag + 2;
 
             delay(1000);
         }
 
         if(digitalRead(Drawing_button) == LOW){
-
-            Serial1.print(3);
-            Serial1.print('/');
-            Serial1.print(X);
-            Serial1.print('/');
-            Serial1.print(Y);
-            Serial1.print('/');
-            Serial1.print('&');
+            
+            sprintf(buff, "%d/%d/%d/&", 3,X,Y)
+            Serial1.print(buff); 
 
             drawing_flag = ~drawing_flag + 2;
 
@@ -116,39 +108,24 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(ZoomIn_button) == LOW ){             //ZoomIn Function
 
-            Serial1.print(2);
-            Serial1.print('/');
-            Serial1.print(X);
-            Serial1.print('/');
-            Serial1.print(Y);
-            Serial1.print('/');
-            Serial1.print('&'); 
+            sprintf(buff, "%d/%d/%d/&", 2,X,Y)
+            Serial1.print(buff); 
             delay(1000);       
             
         }
 
         if(digitalRead(Motion_button) == LOW){              //Motion Control
 
-            Serial1.print(1);
-            Serial1.print('/');
-            Serial1.print(X);
-            Serial1.print('/');
-            Serial1.print(Y);
-            Serial1.print('/');
-            Serial1.print('&');
+            sprintf(buff, "%d/%d/%d/&", 1,X,Y)
+            Serial1.print(buff); 
                   
         }
         else{
         
             if( drawing_flag == true || zoomin_flag == true ){
 
-                Serial1.print(7);
-                Serial1.print('/');
-                Serial1.print(X);
-                Serial1.print('/');
-                Serial1.print(Y);
-                Serial1.print('/');
-                Serial1.print('&');
+            sprintf(buff, "%d/%d/%d/&", 7,X,Y)
+            Serial1.print(buff); 
 
             }
         }
