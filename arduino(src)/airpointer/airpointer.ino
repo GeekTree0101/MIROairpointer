@@ -41,6 +41,9 @@ void MPU_setup();                       //MPU6050 Init Setup
 short Check_X(int Data);                //Calculate X position
 short Check_Y(int Data);                //Calculate Y position
 
+boolean drawing_flag; = false;
+
+
 void setup(){                               //Hardware Setup
 
     Serial1.begin(9600);                     //bluetooth serial 9600 baudrate
@@ -79,6 +82,18 @@ void loop(){                                //Main Loop Proc
         X = Check_X(Data_Stack[6]);
         Y = Check_Y(Data_Stack[4]);
         
+        if(drawing_flag == true){
+
+            Serial1.print(7);
+            Serial1.print('/');
+            Serial1.print(X);
+            Serial1.print('/');
+            Serial1.print(Y);
+            Serial1.print('/');
+            Serial1.print('&');
+
+        }
+
         if(digitalRead(Click_button) == LOW){              //Click Function
             
             Serial1.print(4);
@@ -100,6 +115,9 @@ void loop(){                                //Main Loop Proc
             Serial1.print(Y);
             Serial1.print('/');
             Serial1.print('&');
+
+            drawing_flag = ~drawing_flag + 2;
+
             delay(1000);
             
         }
