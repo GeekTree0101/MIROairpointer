@@ -33,6 +33,7 @@
 boolean Drawing_flag = false;                   // Drawing Flag
 boolean Zoom_flag = false;                      // Zoom Flag
 boolean Serial_control_flag = false;            // received serial data control flag
+boolean mouse_press_flag = false;
 
 // Global variable
 unsigned int function_state = 99;               // function state base on state data
@@ -155,15 +156,17 @@ void loop(){                                   // Main Loop Proc
                 break;
 
             // Motion controll section
-            case DATA_MOTION:
+            case DATA_MOTION:                                       
 
-                if(Drawing_flag == true){
+                if(Drawing_flag == true && mouse_press_flag == false){
 
                   Mouse.press(MOUSE_LEFT);
+                  mouse_press_flag = ~mouse_press_flag + 2;
                 }
-                else if(Zoom_flag == true){
+                else if(Zoom_flag == true && mouse_press_flag == false){
 
                   Mouse.press(MOUSE_LEFT);
+                  mouse_press_flag = ~mouse_press_flag + 2;
                 }
                 
                 Mouse.move(X,Y,0);
@@ -174,10 +177,13 @@ void loop(){                                   // Main Loop Proc
 
                 if( Drawing_flag == true || Zoom_flag == true ){     //Zoom or Drawing active state
                     
+                    mouse_press_flag = ~mouse_press_flag + 2;
+                    Mouse.release(MOUSE_LEFT);
                     Mouse.move(X,Y,0);
                 }
                 else{
 
+                    mouse_press_flag = ~mouse_press_flag + 2;
                     Mouse.release(MOUSE_ALL);
                 }
                 
