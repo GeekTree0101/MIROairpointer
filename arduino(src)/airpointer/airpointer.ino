@@ -161,16 +161,23 @@ void loop(){                                //Main Loop Proc
 void Button_setup(){                                      //Pull-up Digital Button;
 
     //XXX : Must script base on DDR, PORT register
-    pinMode(Drawing_button,INPUT);
-    pinMode(Click_button ,INPUT);
-    pinMode(ZoomIn_button,INPUT);
-    pinMode(Motion_button,INPUT);
-    pinMode(Lazer_button,OUTPUT);
 
-    digitalWrite(Drawing_button,HIGH);
-    digitalWrite(Click_button ,HIGH);
-    digitalWrite(ZoomIn_button,HIGH);
-    digitalWrite(Motion_button,HIGH);
+    pinMode(Drawing_button,INPUT);  //DDRE.6 0b 0X00 0000 X:1  (1 = INPUT)
+    pinMode(Click_button ,INPUT);   //DDRB.4 0b 000X 0000 X:1
+    pinMode(ZoomIn_button,INPUT);   //DDRB.5 0b 00X0 0000 X:1
+    pinMode(Motion_button,INPUT);   //DDRB.6 0b 0X00 0000 X:1
+    pinMode(Lazer_button,OUTPUT);   //DDRB.7 0b X000 0000 X:0  (0 = OUTPUT)
+    
+    //DDRE = 0x40;
+    //DDRB = 0x70;  
+
+    digitalWrite(Drawing_button,HIGH); //PORTE.6 0b0X00 0000 X:1
+    digitalWrite(Click_button ,HIGH);  //PORTB.4
+    digitalWrite(ZoomIn_button,HIGH);  //PORTB.5
+    digitalWrite(Motion_button,HIGH);  //PORTB.6 0bXXXX 0000 X:1 (1 = HIGH)
+
+    //PORTB = 0xF0;
+    //PORTE = 0x40;
 }
 
 void MPU_setup(){                           //MPU6050 Init Setup
