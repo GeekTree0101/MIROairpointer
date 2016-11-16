@@ -176,14 +176,17 @@ void loop(){                                   // Main Loop Proc
             default :
 
                 if( Drawing_flag == true || Zoom_flag == true ){     //Zoom or Drawing active state
-                    
-                    mouse_press_flag = ~mouse_press_flag + 2;
+
+                    if(mouse_press_flag == true){
+                        mouse_press_flag = false;
+                    }                    
                     Mouse.release(MOUSE_LEFT);
                     Mouse.move(X,Y,0);
                 }
                 else{
-
-                    mouse_press_flag = ~mouse_press_flag + 2;
+                    if(mouse_press_flag == true){
+                        mouse_press_flag = false;
+                    }     
                     Mouse.release(MOUSE_ALL);
                 }
                 
