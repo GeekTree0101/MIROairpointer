@@ -66,7 +66,7 @@ void setup(){                               //Hardware Setup
 
 void loop(){                                //Main Loop Proc
 
-    char node[4] ={ ' ' };   //char buffer
+    char node[4] ={ ' ' };                  //char buffer
     
     unsigned short node_index = 0;
     unsigned short output_pos = 0;
@@ -95,11 +95,7 @@ void loop(){                                //Main Loop Proc
                    case 2 : Y = str.toInt();
                        break;
                }
-               Serial.print(function_state);
-               Serial.print('\t');
-               Serial.print(X);
-               Serial.print('\t');
-               Serial.println(Y);      
+   
               
                // init
                node_index = 0;               

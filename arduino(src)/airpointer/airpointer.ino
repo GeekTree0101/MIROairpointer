@@ -55,7 +55,7 @@ void setup(){                               //Hardware Setup
 
 void loop(){                                //Main Loop Proc
 
-    //XXX : Must import Low Battery System Cuz, overhead very big in this loop
+    //NOTE : Must import Low Battery System Cuz, overhead very big in this loop
     
     int16_t* Data_Stack;
     Data_Stack = (int16_t*)malloc(7*sizeof(int16_t));
