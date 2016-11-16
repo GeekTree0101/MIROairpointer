@@ -11,31 +11,33 @@
        [+] Import Library
 **********************************/
 
-#include <Mouse.h>
-#include <Keyboard.h>
-#include <unistd.h>
+#include <Mouse.h>                            // Mouse lib
+#include <Keyboard.h>                         // Keyboard lib
+#include <unistd.h>                           // string to int lib
 
 /**********************************
     [+] Global & Const Variables
 **********************************/
 
-// Data protocol
-// reference : airpointer.ino
+//function state data
 #define DATA_MOTION 1
 #define DATA_ZOOMIN 2
 #define DATA_DRAWING 3
 #define DATA_PASSPAGE 4
 
-#define key_press_delay 30              //key & Mouse Motion delay time
+// HID delay
+#define key_press_delay 30             
 #define mouse_press_delay 50
 
-boolean Drawing_flag = false;                   //Drawing Flag
-boolean Zoom_flag = false;                      //Zoom Flag
-boolean Serial_control_flag = false;            //recved serial data control flag
+// Process control flag
+boolean Drawing_flag = false;                   // Drawing Flag
+boolean Zoom_flag = false;                      // Zoom Flag
+boolean Serial_control_flag = false;            // received serial data control flag
 
-unsigned int function_state = 99;
-short X = 0;
-short Y = 0;
+// Global variable
+unsigned int function_state = 99;               // function state base on state data
+short X = 0;                                    // HID mouse X position
+short Y = 0;                                    // HID mouse Y position
 
 /**********************************
         [+] Function
@@ -43,9 +45,13 @@ short Y = 0;
 
 void Mouse_interface_setup();           //Mouse Init Setup
 void Keyboard_interface_setup();        //Keyboard Init Setup
+
+//Zoom function
 void ZoomIn_start();
 void ZoomIn_cancel();
 void ZoomIn_event();
+
+//Drawing function
 void Drawing_start();
 void Drawing_cancel();
 void Drawing_event();

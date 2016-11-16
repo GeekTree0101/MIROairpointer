@@ -41,8 +41,8 @@ void MPU_setup();                       //MPU6050 Init Setup
 short Check_X(int Data);                //Calculate X position
 short Check_Y(int Data);                //Calculate Y position
 
-boolean drawing_flag; = false;
-
+boolean drawing_flag = false;
+boolean zoomin_flag = false;
 
 void setup(){                               //Hardware Setup
 
@@ -82,7 +82,7 @@ void loop(){                                //Main Loop Proc
         X = Check_X(Data_Stack[6]);
         Y = Check_Y(Data_Stack[4]);
         
-        if(drawing_flag == true){
+        if( drawing_flag == true || zoomin_flag == true ){
 
             Serial1.print(7);
             Serial1.print('/');
@@ -103,6 +103,9 @@ void loop(){                                //Main Loop Proc
             Serial1.print(Y);
             Serial1.print('/');
             Serial1.print('&');    
+
+            zoomin_flag = ~zoomin_flag + 2;
+
             delay(1000);
         }
 
@@ -147,15 +150,13 @@ void loop(){                                //Main Loop Proc
                   
         }
 
-                           // Loop-Proc delay time
-
     }
   
     free(Data_Stack);                                     // Data-Stack memory free
 }
 
 
-void Button_setup(){                        //Pull-up Digital Button;
+void Button_setup(){                                      //Pull-up Digital Button;
 
     //XXX : Must script base on DDR, PORT register
     pinMode(Drawing_button,INPUT);
