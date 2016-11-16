@@ -169,7 +169,7 @@ void loop(){                                //Main Loop Proc
 
             default :
 
-                if(Zoom_flag == true || Drawing_flag == true ){     //Zoom or Drawing active state
+                if(Drawing_flag == true ){     //Zoom or Drawing active state
                     
                     Mouse.move(X,Y,0);
                 }
