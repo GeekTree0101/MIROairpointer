@@ -43,8 +43,8 @@ short Y = 0;                                    // HID mouse Y position
         [+] Function
 ***********************************/
 
-void Mouse_interface_setup();           //Mouse Init Setup
-void Keyboard_interface_setup();        //Keyboard Init Setup
+void Mouse_interface_setup();                   //Mouse Init Setup
+void Keyboard_interface_setup();                //Keyboard Init Setup
 
 //Zoom function
 void ZoomIn_start();
@@ -56,17 +56,18 @@ void Drawing_start();
 void Drawing_cancel();
 void Drawing_event();
 
-void setup(){                               //Hardware Setup
+void setup(){                                  //Hardware Setup
 
     //NOTE : arduino micro(atmega32u4) using Serial1 
+
     Serial1.begin(9600);
     Mouse_interface_setup();
     Keyboard_interface_setup();
 }
 
-void loop(){                                //Main Loop Proc
+void loop(){                                   // Main Loop Proc
 
-    char node[4] ={ ' ' };                  //char buffer
+    char node[4] ={ ' ' };                     // char buffer
     
     unsigned short node_index = 0;
     unsigned short output_pos = 0;
@@ -77,13 +78,13 @@ void loop(){                                //Main Loop Proc
       
             char buff = Serial1.read();
 
-            if(buff == '&'){                    //exit
+            if(buff == '&'){                    // exit flag control
                 
               digitalWrite(5,LOW);
               Serial_control_flag = true;
               break;
             }
-            else if(buff == '/'){                    //slash
+            else if(buff == '/'){               // serial data production
 
                String str = node;      
               
@@ -96,7 +97,6 @@ void loop(){                                //Main Loop Proc
                        break;
                }
    
-              
                // init
                node_index = 0;               
                node[0] = ' ';
@@ -112,18 +112,18 @@ void loop(){                                //Main Loop Proc
                node_index++;
             }
         }
-                                     // start bit == * endif
-    }                                  //available endif
+                                
+    }                               
 
     
-    if (Serial_control_flag) {
+    if (Serial_control_flag) {                 // Reality HID control section
         
         switch(function_state){
 
-            //Zoomin proc
+            // Zoomin control section
             case DATA_ZOOMIN:  
                 
-                ZoomIn_event();        //Zoomin flag toogle function
+                ZoomIn_event();                // Zoomin flag toogle function
                 
                 if(Zoom_flag == true){      
                     ZoomIn_start();
@@ -133,10 +133,10 @@ void loop(){                                //Main Loop Proc
                 }
                 break;
 
-            //Drawing proc
+            // Drawing control section
             case DATA_DRAWING:
 
-                Drawing_event();       //Drawing flag toogle function
+                Drawing_event();               // Drawing flag toogle function
             
                 if(Drawing_flag == true){
                     Drawing_start();
@@ -147,13 +147,14 @@ void loop(){                                //Main Loop Proc
 
                 break;
 
-            //Passpage proc
+            // Passpage control section
             case DATA_PASSPAGE:
 
                 Mouse.click(MOUSE_LEFT);
                 delay(500);
                 break;
 
+            // Motion controll section
             case DATA_MOTION:
 
                 if(Drawing_flag == true){
