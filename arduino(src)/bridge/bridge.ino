@@ -186,16 +186,16 @@ void loop(){                                //Main Loop Proc
 
 void Drawing_event(){                       //Drawing event Function
 
-  if(!Zoom_flag){
-    Drawing_flag != Drawing_flag; 
+  if(Zoom_flag == false){
+    Drawing_flag = ~Drawing_flag + 2; 
   }
 
 }
 
 void ZoomIn_event() {                     //Zoomin function toggling
   
-  if(!Drawing_flag){
-     Zoom_flag != Zoom_flag;
+  if(Drawing_flag == false){
+     Zoom_flag = ~Zoom_flag + 2;
   }
   
 }
