@@ -81,6 +81,8 @@ void loop(){                                //Main Loop Proc
 
         X = Check_X(Data_Stack[6]);
         Y = Check_Y(Data_Stack[4]);
+
+        
         
 
         if(digitalRead(Click_button) == LOW){              //Click Function
@@ -104,7 +106,14 @@ void loop(){                                //Main Loop Proc
             Serial1.print('/');
             Serial1.print(X);
             Serial1.print('/');
-            Serial1.print(Y);
+            
+            if(Y > 3 || Y < -3){
+               Serial1.print(Y);
+            }
+            else{
+               Serial.print(0);
+            }
+            
             Serial1.print('/');
             Serial1.print('&');
 
@@ -226,19 +235,19 @@ short Check_Y(int Data) {
 
             if(Data > 1000) {
             
-              Yval = Data / 1000;
+              Yval = 1+Data / 1000;
             }
             else if(Data < -1000){
             
-              Yval = Data / 1000;
+              Yval = -1+Data / 1000;
             }
             else if(Data > 500 && Data < 1000)  {                
               
-              Yval = 1;               
+              Yval = 2;               
             }
             else if(Data > -1000 && Data < -500) {
                 
-                Yval = -1;
+                Yval = -2;
              }
             else {
                 
