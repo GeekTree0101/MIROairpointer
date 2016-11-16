@@ -179,20 +179,22 @@ void loop(){                                   // Main Loop Proc
 
                     if(mouse_press_flag == true){
 
+                        Mouse.release(MOUSE_LEFT); 
                         mouse_press_flag = false;
                     }
-                                          
-                    Mouse.release(MOUSE_LEFT);
+
+                    
                     Mouse.move(X,Y,0);
                 }
                 else{
 
                     if(mouse_press_flag == true){
-                    
+                        
+                        Mouse.release(MOUSE_ALL);
                         mouse_press_flag = false;
                     }
 
-                    Mouse.release(MOUSE_ALL);
+                    
                 }
                 
         }

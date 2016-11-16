@@ -160,7 +160,7 @@ void loop(){                                //Main Loop Proc
 
 void Button_setup(){                                      //Pull-up Digital Button;
 
-    //XXX : Must script base on DDR, PORT register
+    //FIXME : Must script base on DDR, PORT register
 
     pinMode(Drawing_button,INPUT);  //DDRE.6 0b 0X00 0000 X:1  (1 = INPUT)
     pinMode(Click_button ,INPUT);   //DDRB.4 0b 000X 0000 X:1
