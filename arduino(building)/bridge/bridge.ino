@@ -78,7 +78,7 @@ void loop(){                                   // Main Loop Proc
     if(Serial1.available()){
       
            
-        String str = Serial1.readString();
+        String str = Serial1.readStringUtil('&');
 
         int count = 0;
 
@@ -97,7 +97,7 @@ void loop(){                                   // Main Loop Proc
             }
             else if(count == 2){
                 Y = str[i];
-                function_state = true;
+                Serial_control_flag = true;
                 break;
             }
         }
