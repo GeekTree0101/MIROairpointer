@@ -19,12 +19,11 @@
     [+] Global & Const Variables
 **********************************/
 
-// Data protocol
-
-#define DATA_MOTION "D"
-#define DATA_ZOOMIN "C"
-#define DATA_DRAWING "B"
-#define DATA_PASSPAGE "A"
+//function state data
+#define DATA_MOTION 1
+#define DATA_ZOOMIN 2
+#define DATA_DRAWING 3
+#define DATA_PASSPAGE 4
 
 // HID delay
 #define key_press_delay 30             
@@ -36,8 +35,8 @@ boolean Zoom_flag = false;                      // Zoom Flag
 boolean Serial_control_flag = false;            // received serial data control flag
 boolean mouse_press_flag = false;
 
-// Global Variables
-String function_state = "N";               // function state base on state data
+// Global variable
+unsigned int function_state = 99;               // function state base on state data
 short X = 0;                                    // HID mouse X position
 short Y = 0;                                    // HID mouse Y position
 
@@ -76,8 +75,6 @@ void loop(){                                   // Main Loop Proc
 
     while(1){
     
-        Serial1.flush();
-
         int count = 0;
     
         while(1){
@@ -87,14 +84,17 @@ void loop(){                                   // Main Loop Proc
                 String str = Serial1.readStringUntil('/');
     
                 if(count == 0){
-                    function_state = str;
                     count++;
                 }
-                else if(count == 1){
-                    X = str.toInt();
+                if(count == 1){
+                    function_state = str.toInt();
                     count++;
                 }
                 else if(count == 2){
+                    X = str.toInt();
+                    count++;
+                }
+                else if(count == 3){
                     Y = str.toInt();
                     Serial_control_flag = true;
                     count = 0;
@@ -107,8 +107,10 @@ void loop(){                                   // Main Loop Proc
     
         if (Serial_control_flag) {                 // Reality HID control section
         
+            switch(function_state){
+
                 // Zoomin control section
-                if(function_state == DATA_ZOOMIN){  
+                case DATA_ZOOMIN:  
                 
                     ZoomIn_event();                // Zoomin flag toogle function
                     
@@ -118,10 +120,10 @@ void loop(){                                   // Main Loop Proc
                     else{
                         ZoomIn_cancel();
                     }
-            
-                }
+                    break;
+
                 // Drawing control section
-                else if(function_state == DATA_DRAWING){
+                case DATA_DRAWING:
 
                     Drawing_event();               // Drawing flag toogle function
             
@@ -132,16 +134,17 @@ void loop(){                                   // Main Loop Proc
                         Drawing_cancel();
                     } 
 
-                
-                }
+                    break;
+
                 // Passpage control section
-                else if(function_state = DATA_PASSPAGE){
+                case DATA_PASSPAGE:
 
                     Mouse.click(MOUSE_LEFT);
                     delay(500);
-                }
+                    break;
+
                 // Motion controll section
-                else if(function_state == DATA_MOTION){                                       
+                case DATA_MOTION:                                       
 
                     if(Drawing_flag == true && mouse_press_flag == false){
 
@@ -156,8 +159,8 @@ void loop(){                                   // Main Loop Proc
                 
                     Mouse.move(X,Y,0);
 
-                }
-                else{
+                    break;
+                default :
 
                     if( Drawing_flag == true || Zoom_flag == true ){     //Zoom or Drawing active state
 
@@ -169,8 +172,6 @@ void loop(){                                   // Main Loop Proc
 
                     
                         Mouse.move(X,Y,0);
-
-
                     }
                     else{
 
@@ -182,10 +183,10 @@ void loop(){                                   // Main Loop Proc
 
                     
                     }
-                }
                 
-        
-            function_state = "N";
+            }
+
+            function_state = 99;
         }
     }
 }

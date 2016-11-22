@@ -28,10 +28,10 @@
 #define Hardware_delay 10               //Hardware Delay
 
 // Data protocol
-#define DATA_MOTION "D"
-#define DATA_ZOOMIN "C"
-#define DATA_DRAWING "B"
-#define DATA_PASSPAGE "A"
+#define DATA_MOTION 1
+#define DATA_ZOOMIN 2
+#define DATA_DRAWING 3
+#define DATA_PASSPAGE 4
 
 /**********************************
         [+] Function
@@ -66,7 +66,7 @@ void loop(){                                //Main Loop Proc
         
         short X = 0;
         short Y = 0;
-        char buff[7];
+        String packet = "";
 
         Wire.beginTransmission(0x68);         //Begin MPU
         Wire.write(0x3B);
@@ -87,18 +87,16 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Click_button) == LOW){              //Click Function
             
-            sprintf(buff, "%s/%d/%d/",DATA_PASSPAGE,X,Y);
-            Serial1.println(buff); 
-
-            zoomin_flag = ~zoomin_flag + 2;
+            packet = "/" + DATA_PASSPAGE + "/" X + "/" + Y + "/";
+            Serial1.println(packet); 
 
             delay(1000);
         }
 
         if(digitalRead(Drawing_button) == LOW){
 
-            sprintf(buff, "%s/%d/%d/",DATA_DRAWING ,X,Y);
-            Serial1.println(buff); 
+            packet =  "/" +  DATA_DRAWING + "/" X + "/" + Y + "/";
+            Serial1.println(packet); 
 
             drawing_flag = ~drawing_flag + 2;
 
@@ -108,22 +106,31 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(ZoomIn_button) == LOW ){             //ZoomIn Function
 
-            sprintf(buff, "%s/%d/%d/",DATA_ZOOMIN ,X,Y);
-            Serial1.println(buff); 
+
+            packet =  "/" +  DATA_ZOOMIN + "/" X + "/" + Y + "/";
+            Serial1.println(packet); 
+
+            
+            zoomin_flag = ~zoomin_flag + 2;
+ 
             delay(1000);       
             
         }
 
         if(digitalRead(Motion_button) == LOW){              //Motion Control
 
-            sprintf(buff, "%s/%d/%d/",DATA_MOTION ,X,Y);
+            packet =  "/" +  DATA_MOTION + "/" X + "/" + Y + "/";
+            Serial1.println(packet); 
+
             Serial1.println(buff); 
         }
         else{
         
             if( drawing_flag == true || zoomin_flag == true ){
 
-            sprintf(buff, "%s/%d/%d/","N",X,Y);
+            packet =  "/" +  7 + "/" X + "/" + Y + "/";
+            Serial1.println(packet); 
+
             Serial1.println(buff); 
             }
         }
