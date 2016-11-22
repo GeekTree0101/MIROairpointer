@@ -107,10 +107,8 @@ void loop(){                                   // Main Loop Proc
     
         if (Serial_control_flag) {                 // Reality HID control section
         
-            switch(function_state){
-
                 // Zoomin control section
-                case DATA_ZOOMIN:  
+                if(function_state == DATA_ZOOMIN){  
                 
                     ZoomIn_event();                // Zoomin flag toogle function
                     
@@ -120,10 +118,10 @@ void loop(){                                   // Main Loop Proc
                     else{
                         ZoomIn_cancel();
                     }
-                    break;
-
+            
+                }
                 // Drawing control section
-                case DATA_DRAWING:
+                else if(function_state == DATA_DRAWING){
 
                     Drawing_event();               // Drawing flag toogle function
             
@@ -134,17 +132,16 @@ void loop(){                                   // Main Loop Proc
                         Drawing_cancel();
                     } 
 
-                    break;
-
+                
+                }
                 // Passpage control section
-                case DATA_PASSPAGE:
+                else if(function_state = DATA_PASSPAGE){
 
                     Mouse.click(MOUSE_LEFT);
                     delay(500);
-                    break;
-
+                }
                 // Motion controll section
-                case DATA_MOTION:                                       
+                else if(function_state == DATA_MOTION){                                       
 
                     if(Drawing_flag == true && mouse_press_flag == false){
 
@@ -159,8 +156,8 @@ void loop(){                                   // Main Loop Proc
                 
                     Mouse.move(X,Y,0);
 
-                    break;
-                default :
+                }
+                else{
 
                     if( Drawing_flag == true || Zoom_flag == true ){     //Zoom or Drawing active state
 
@@ -172,6 +169,8 @@ void loop(){                                   // Main Loop Proc
 
                     
                         Mouse.move(X,Y,0);
+            switch(function_state){
+
                     }
                     else{
 
@@ -183,9 +182,9 @@ void loop(){                                   // Main Loop Proc
 
                     
                     }
+                }
                 
-            }
-
+        
             function_state = "N";
         }
     }
