@@ -169,7 +169,7 @@ void loop(){                                   // Main Loop Proc
 
                     
                         Mouse.move(X,Y,0);
-            switch(function_state){
+
 
                     }
                     else{
