@@ -75,32 +75,28 @@ void loop(){                                   // Main Loop Proc
 
     while(1){
     
+    int count = 0;
+        
     if(Serial1.available()){
       
            
-        String str = Serial1.readStringUtil('&');
-
-        int count = 0;
-
-        for(int i = 0; i < str.length(); i++){
-
-            if(str[i] == '/'){
-                count++;
-                continue;
-            }
-
+        String str = Serial1.readStringUtil('/');
+    
             if(count == 0){
-                function_state = str[i];
+                function_state = atoi(str);
+                count++;
             }
             else if(count == 1){
-                X = str[i];
+                X = atoi(str);
+                count++;
             }
             else if(count == 2){
-                Y = str[i];
+                Y = atoi(str);
                 Serial_control_flag = true;
+                count = 0;
                 break;
             }
-        }
+        
                                 
     }                               
 
