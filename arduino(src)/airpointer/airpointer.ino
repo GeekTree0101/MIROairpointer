@@ -12,6 +12,7 @@
 
 #include <Wire.h>
 #include <MPU6050.h>
+#include <stdio.h>
 /**********************************
     [+] Global & Const Variables
 **********************************/
@@ -31,7 +32,7 @@
 #define DATA_ZOOMIN 2
 #define DATA_DRAWING 3
 #define DATA_PASSPAGE 4
-
+#define DATA_DEFAULT 7
 /**********************************
         [+] Function
 ***********************************/
@@ -43,6 +44,10 @@ short Check_Y(int Data);                //Calculate Y position
 
 boolean drawing_flag = false;
 boolean zoomin_flag = false;
+
+//Program Locker
+unsigned int lock = 0;
+boolean lock_check  = false;
 
 void setup(){                               //Hardware Setup
 
@@ -62,10 +67,26 @@ void loop(){                                //Main Loop Proc
     
 
     while(1){
+
+
+        /*
+         * Locker : 카운트 레지스터를 이용한 프로그래밍 적인 딜레이 연출
+         * No delay() API
+        */
+        if(lock_check == true){
+              
+              lock++;
+              
+              if(lock > 400){
+                lock = 0;
+                lock_check = false;
+              }      
+        }
         
         short X = 0;
         short Y = 0;
-        
+        String packet = "";
+
         Wire.beginTransmission(0x68);         //Begin MPU
         Wire.write(0x3B);
         Wire.endTransmission(false);             //Sustain connection
@@ -81,85 +102,82 @@ void loop(){                                //Main Loop Proc
 
         X = Check_X(Data_Stack[6]);
         Y = Check_Y(Data_Stack[4]);
-
-        
         
 
-        if(digitalRead(Click_button) == LOW){              //Click Function
+        if(digitalRead(Click_button) == LOW && lock == 0){              //Click Function
+
+            packet = packet + "*";
+            packet = packet  + DATA_PASSPAGE; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
             
-            Serial1.print(4);
-            Serial1.print('/');
-            Serial1.print(X);
-            Serial1.print('/');
-            Serial1.print(Y);
-            Serial1.print('/');
-            Serial1.print('&');    
-
-            zoomin_flag = ~zoomin_flag + 2;
-
-            delay(1000);
+            lock_check = true;
+            lock++;
         }
+        else if(digitalRead(Drawing_button) == LOW  && lock == 0){
 
-        if(digitalRead(Drawing_button) == LOW){
-
-            Serial1.print(3);
-            Serial1.print('/');
-            Serial1.print(X);
-            Serial1.print('/');
+            packet = packet + "*";
+            packet = packet  + DATA_DRAWING ; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
             
-            if(Y > 3 || Y < -3){
-               Serial1.print(Y);
-            }
-            else{
-               Serial.print(0);
-            }
-            
-            Serial1.print('/');
-            Serial1.print('&');
-
+            lock++;
             drawing_flag = ~drawing_flag + 2;
-
-            delay(1000);
-            
+            lock_check = true;
         }
-
-        if(digitalRead(ZoomIn_button) == LOW ){             //ZoomIn Function
-
-            Serial1.print(2);
-            Serial1.print('/');
-            Serial1.print(X);
-            Serial1.print('/');
-            Serial1.print(Y);
-            Serial1.print('/');
-            Serial1.print('&'); 
-            delay(1000);       
+        else if(digitalRead(ZoomIn_button) == LOW  && lock == 0){             //ZoomIn Function
+            packet = packet + "*";
+            packet = packet  + DATA_ZOOMIN; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
             
+            lock++;
+            zoomin_flag = ~zoomin_flag + 2;
+            lock_check = true;
         }
+        else if(digitalRead(Motion_button) == LOW){              //Motion Control
 
-        if(digitalRead(Motion_button) == LOW){              //Motion Control
-
-            Serial1.print(1);
-            Serial1.print('/');
-            Serial1.print(X);
-            Serial1.print('/');
-            Serial1.print(Y);
-            Serial1.print('/');
-            Serial1.print('&');
-                  
+            packet = packet + "*";
+            packet = packet  + DATA_MOTION; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
         }
         else{
-        
+       
             if( drawing_flag == true || zoomin_flag == true ){
 
-                Serial1.print(7);
-                Serial1.print('/');
-                Serial1.print(X);
-                Serial1.print('/');
-                Serial1.print(Y);
-                Serial1.print('/');
-                Serial1.print('&');
+            packet = packet + "*";
+            packet = packet  + DATA_DEFAULT; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
 
             }
+        
         }
     }
   
@@ -235,19 +253,19 @@ short Check_Y(int Data) {
 
             if(Data > 1000) {
             
-              Yval = 1+Data / 1000;
+              Yval = Data / 1000;
             }
             else if(Data < -1000){
             
-              Yval = -1+Data / 1000;
+              Yval = Data / 1000;
             }
             else if(Data > 500 && Data < 1000)  {                
               
-              Yval = 2;               
+              Yval = 1;               
             }
             else if(Data > -1000 && Data < -500) {
                 
-                Yval = -2;
+                Yval = -1;
              }
             else {
                 
