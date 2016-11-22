@@ -76,11 +76,12 @@ void loop(){                                   // Main Loop Proc
     while(1){
     
     int count = 0;
+    
+    while(1){
         
-    if(Serial1.available()){
-      
-           
-        String str = Serial1.readStringUtil('/');
+        if(Serial1.available()){
+        
+            String str = Serial1.readStringUntil('/');
     
             if(count == 0){
                 function_state = str.toInt();
@@ -96,7 +97,7 @@ void loop(){                                   // Main Loop Proc
                 count = 0;
                 break;
             }
-        
+        }
                                 
     }                               
 
