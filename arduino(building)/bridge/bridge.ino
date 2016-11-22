@@ -75,6 +75,8 @@ void loop(){                                   // Main Loop Proc
 
     while(1){
     
+        Serial1.flush();
+        
         int count = 0;
     
         while(1){
