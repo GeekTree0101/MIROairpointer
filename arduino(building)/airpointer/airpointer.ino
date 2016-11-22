@@ -87,7 +87,7 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Click_button) == LOW){              //Click Function
             
-            sprintf(buff, "%d/%d/%d/&",4,X,Y);
+            sprintf(buff, "%d/%d/%d/",4,X,Y);
             Serial1.println(buff); 
 
             zoomin_flag = ~zoomin_flag + 2;
@@ -97,7 +97,7 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Drawing_button) == LOW){
 
-            sprintf(buff, "%d/%d/%d/&",3,X,Y);
+            sprintf(buff, "%d/%d/%d/",3,X,Y);
             Serial1.println(buff); 
 
             drawing_flag = ~drawing_flag + 2;
@@ -108,7 +108,7 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(ZoomIn_button) == LOW ){             //ZoomIn Function
 
-            sprintf(buff, "%d/%d/%d/&",2,X,Y);
+            sprintf(buff, "%d/%d/%d/",2,X,Y);
             Serial1.println(buff); 
             delay(1000);       
             
@@ -116,14 +116,14 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Motion_button) == LOW){              //Motion Control
 
-            sprintf(buff, "%d/%d/%d/&",1,X,Y);
+            sprintf(buff, "%d/%d/%d/",1,X,Y);
             Serial1.println(buff); 
         }
         else{
         
             if( drawing_flag == true || zoomin_flag == true ){
 
-            sprintf(buff, "%d/%d/%d/&",7,X,Y);
+            sprintf(buff, "%d/%d/%d/",7,X,Y);
             Serial1.println(buff); 
             }
         }
