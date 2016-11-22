@@ -83,15 +83,15 @@ void loop(){                                   // Main Loop Proc
         String str = Serial1.readStringUtil('/');
     
             if(count == 0){
-                function_state = atoi(str);
+                function_state = str.toInt();
                 count++;
             }
             else if(count == 1){
-                X = atoi(str);
+                X = str.toInt();
                 count++;
             }
             else if(count == 2){
-                Y = atoi(str);
+                Y = str.toInt();
                 Serial_control_flag = true;
                 count = 0;
                 break;
