@@ -32,7 +32,7 @@
 #define DATA_ZOOMIN 2
 #define DATA_DRAWING 3
 #define DATA_PASSPAGE 4
-
+#define DATA_DEFAULT 7
 /**********************************
         [+] Function
 ***********************************/
@@ -87,7 +87,7 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Click_button) == LOW){              //Click Function
             
-            packet = "/" + DATA_PASSPAGE + "/" X + "/" + Y + "/";
+            packet = "/" + DATA_PASSPAGE + "/" + X + "/" + Y + "/";
             Serial1.println(packet); 
 
             delay(1000);
@@ -95,7 +95,7 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Drawing_button) == LOW){
 
-            packet =  "/" +  DATA_DRAWING + "/" X + "/" + Y + "/";
+            packet =  "/" +  DATA_DRAWING + "/" + X + "/" + Y + "/";
             Serial1.println(packet); 
 
             drawing_flag = ~drawing_flag + 2;
@@ -107,7 +107,7 @@ void loop(){                                //Main Loop Proc
         if(digitalRead(ZoomIn_button) == LOW ){             //ZoomIn Function
 
 
-            packet =  "/" +  DATA_ZOOMIN + "/" X + "/" + Y + "/";
+            packet =  "/" +  DATA_ZOOMIN + "/" + X + "/" + Y + "/";
             Serial1.println(packet); 
 
             
@@ -119,7 +119,7 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Motion_button) == LOW){              //Motion Control
 
-            packet =  "/" +  DATA_MOTION + "/" X + "/" + Y + "/";
+            packet =  "/" +  DATA_MOTION + "/"  + X + "/" + Y + "/";
             Serial1.println(packet); 
 
             Serial1.println(buff); 
@@ -128,7 +128,7 @@ void loop(){                                //Main Loop Proc
         
             if( drawing_flag == true || zoomin_flag == true ){
 
-            packet =  "/" +  7 + "/" X + "/" + Y + "/";
+            packet =  "/" +  DATA_DEFAULT + "/"  + X + "/" + Y + "/";
             Serial1.println(packet); 
 
             Serial1.println(buff); 
