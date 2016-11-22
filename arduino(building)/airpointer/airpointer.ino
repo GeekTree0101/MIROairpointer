@@ -28,10 +28,10 @@
 #define Hardware_delay 10               //Hardware Delay
 
 // Data protocol
-#define DATA_MOTION 1
-#define DATA_ZOOMIN 2
-#define DATA_DRAWING 3
-#define DATA_PASSPAGE 4
+#define DATA_MOTION 'D'
+#define DATA_ZOOMIN 'C'
+#define DATA_DRAWING 'B'
+#define DATA_PASSPAGE 'A'
 
 /**********************************
         [+] Function
@@ -87,7 +87,7 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Click_button) == LOW){              //Click Function
             
-            sprintf(buff, "%d/%d/%d/",4,X,Y);
+            sprintf(buff, "%c/%d/%d/",DATA_PASSPAGE,X,Y);
             Serial1.println(buff); 
 
             zoomin_flag = ~zoomin_flag + 2;
@@ -97,7 +97,7 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Drawing_button) == LOW){
 
-            sprintf(buff, "%d/%d/%d/",3,X,Y);
+            sprintf(buff, "%c/%d/%d/",DATA_DRAWING ,X,Y);
             Serial1.println(buff); 
 
             drawing_flag = ~drawing_flag + 2;
@@ -108,7 +108,7 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(ZoomIn_button) == LOW ){             //ZoomIn Function
 
-            sprintf(buff, "%d/%d/%d/",2,X,Y);
+            sprintf(buff, "%c/%d/%d/",DATA_ZOOMIN ,X,Y);
             Serial1.println(buff); 
             delay(1000);       
             
@@ -116,14 +116,14 @@ void loop(){                                //Main Loop Proc
 
         if(digitalRead(Motion_button) == LOW){              //Motion Control
 
-            sprintf(buff, "%d/%d/%d/",1,X,Y);
+            sprintf(buff, "%c/%d/%d/",DATA_MOTION ,X,Y);
             Serial1.println(buff); 
         }
         else{
         
             if( drawing_flag == true || zoomin_flag == true ){
 
-            sprintf(buff, "%d/%d/%d/",7,X,Y);
+            sprintf(buff, "%c/%d/%d/",'N',X,Y);
             Serial1.println(buff); 
             }
         }

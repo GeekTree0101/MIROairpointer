@@ -19,11 +19,11 @@
     [+] Global & Const Variables
 **********************************/
 
-//function state data
-#define DATA_MOTION 1
-#define DATA_ZOOMIN 2
-#define DATA_DRAWING 3
-#define DATA_PASSPAGE 4
+// Data protocol
+#define DATA_MOTION 'D'
+#define DATA_ZOOMIN 'C'
+#define DATA_DRAWING 'B'
+#define DATA_PASSPAGE 'A'
 
 // HID delay
 #define key_press_delay 30             
@@ -76,7 +76,7 @@ void loop(){                                   // Main Loop Proc
     while(1){
     
         Serial1.flush();
-        
+
         int count = 0;
     
         while(1){
@@ -86,7 +86,7 @@ void loop(){                                   // Main Loop Proc
                 String str = Serial1.readStringUntil('/');
     
                 if(count == 0){
-                    function_state = str.toInt();
+                    function_state = str;
                     count++;
                 }
                 else if(count == 1){
