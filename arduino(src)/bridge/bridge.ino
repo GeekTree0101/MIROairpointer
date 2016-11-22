@@ -62,6 +62,7 @@ void setup(){                                  //Hardware Setup
     //NOTE : arduino micro(atmega32u4) using Serial1 
 
     Serial1.begin(9600);
+    Serial.begin(9600);
     Mouse_interface_setup();
     Keyboard_interface_setup();
 }
@@ -71,137 +72,115 @@ void loop(){                                   // Main Loop Proc
     char node[4] ={ ' ' };                     // char buffer
     
     unsigned short node_index = 0;
-    unsigned short output_pos = 0;
+    unsigned short output_pos = 0;    
 
+    
     while(1){
-    
-    if(Serial1.available()){
-      
-            char buff = Serial1.read();
-
-            if(buff == '&'){                    // exit flag control
-                
-              digitalWrite(5,LOW);
-              Serial_control_flag = true;
-              break;
-            }
-            else if(buff == '/'){               // serial data production
-
-               String str = node;      
-              
-               switch(output_pos){
-                   case 0 : function_state =  str.toInt();
-                       break;
-                   case 1 : X = str.toInt();
-                       break;
-                   case 2 : Y = str.toInt();
-                       break;
-               }
-   
-               // init
-               node_index = 0;               
-               node[0] = ' ';
-               node[1] = ' ';
-               node[2] = ' ';
-
-               //count up
-               output_pos++; 
-             
-            }
-            else{
-               node[node_index] = buff;
-               node_index++;
-            }
-        }
-                                
-    }                               
-
-    
-    if (Serial_control_flag) {                 // Reality HID control section
         
-        switch(function_state){
-
-            // Zoomin control section
-            case DATA_ZOOMIN:  
+         if(Serial1.available()){
                 
-                ZoomIn_event();                // Zoomin flag toogle function
-                
-                if(Zoom_flag == true){      
-                    ZoomIn_start();
-                }
-                else{
-                    ZoomIn_cancel();
-                }
+                Serial1.flush();
+                String str = Serial1.readStringUntil('*');
+                str = Serial1.readStringUntil('/');
+                function_state = str.toInt();
+                str = Serial1.readStringUntil('/');
+                X = str.toInt();
+                str = Serial1.readStringUntil('/');
+                Y = str.toInt();
+                str = Serial1.readStringUntil('*');
+                Serial_control_flag = true;   
                 break;
+         }
+      }
+                                
+                                       
 
-            // Drawing control section
-            case DATA_DRAWING:
+    
+        if (Serial_control_flag) {                 // Reality HID control section
+        
+            switch(function_state){
 
-                Drawing_event();               // Drawing flag toogle function
+                // Zoomin control section
+                case DATA_ZOOMIN:  
+                
+                    ZoomIn_event();                // Zoomin flag toogle function
+                    
+                    if(Zoom_flag == true){      
+                        ZoomIn_start();
+                    }
+                    else{
+                        ZoomIn_cancel();
+                    }
+                    break;
+
+                // Drawing control section
+                case DATA_DRAWING:
+
+                    Drawing_event();               // Drawing flag toogle function
             
-                if(Drawing_flag == true){
-                    Drawing_start();
-                }
-                else{
-                    Drawing_cancel();
-                } 
-
-                break;
-
-            // Passpage control section
-            case DATA_PASSPAGE:
-
-                Mouse.click(MOUSE_LEFT);
-                delay(500);
-                break;
-
-            // Motion controll section
-            case DATA_MOTION:                                       
-
-                if(Drawing_flag == true && mouse_press_flag == false){
-
-                  Mouse.press(MOUSE_LEFT);
-                  mouse_press_flag = ~mouse_press_flag + 2;
-                }
-                else if(Zoom_flag == true && mouse_press_flag == false){
-
-                  Mouse.press(MOUSE_LEFT);
-                  mouse_press_flag = ~mouse_press_flag + 2;
-                }
-                
-                Mouse.move(X,Y,0);
-
-              break;
-
-            default :
-
-                if( Drawing_flag == true || Zoom_flag == true ){     //Zoom or Drawing active state
-
-                    if(mouse_press_flag == true){
-
-                        Mouse.release(MOUSE_LEFT); 
-                        mouse_press_flag = false;
+                    if(Drawing_flag == true){
+                        Drawing_start();
                     }
+                    else{
+                        Drawing_cancel();
+                    } 
 
-                    
+                    break;
+
+                // Passpage control section
+                case DATA_PASSPAGE:
+
+                    Mouse.click(MOUSE_LEFT);
+                    delay(500);
+                    break;
+
+                // Motion controll section
+                case DATA_MOTION:                                       
+
+                    if(Drawing_flag == true && mouse_press_flag == false){
+
+                        Mouse.press(MOUSE_LEFT);
+                        mouse_press_flag = ~mouse_press_flag + 2;
+                    }
+                    else if(Zoom_flag == true && mouse_press_flag == false){
+
+                        Mouse.press(MOUSE_LEFT);
+                        mouse_press_flag = ~mouse_press_flag + 2;
+                    }
+                
                     Mouse.move(X,Y,0);
-                }
-                else{
 
-                    if(mouse_press_flag == true){
-                        
-                        Mouse.release(MOUSE_ALL);
-                        mouse_press_flag = false;
-                    }
+                    break;
+                default :
+
+                    if( Drawing_flag == true || Zoom_flag == true ){     //Zoom or Drawing active state
+
+                        if(mouse_press_flag == true){
+
+                            Mouse.release(MOUSE_LEFT); 
+                            mouse_press_flag = false;
+                        }
 
                     
-                }
-                
-        }
+                        Mouse.move(X,Y,0);
+                    }
+                    else{
 
-        function_state = 99;
-    } 
-}
+                        if(mouse_press_flag == true){
+                        
+                            Mouse.release(MOUSE_ALL);
+                            mouse_press_flag = false;
+                        }
+
+                    
+                    }
+                
+            }
+
+            function_state = 99;
+        }
+    }
+
 
 void Drawing_event(){                       //Drawing event Function
 
