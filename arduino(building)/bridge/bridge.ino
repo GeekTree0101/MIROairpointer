@@ -36,7 +36,7 @@ boolean Serial_control_flag = false;            // received serial data control 
 boolean mouse_press_flag = false;
 
 // Global variable
-unsigned int function_state = 99;               // function state base on state data
+unsigned char function_state = 'N';               // function state base on state data
 short X = 0;                                    // HID mouse X position
 short Y = 0;                                    // HID mouse Y position
 
@@ -185,7 +185,7 @@ void loop(){                                   // Main Loop Proc
                 
             }
 
-            function_state = 99;
+            function_state = 'N';
         }
     }
 }
