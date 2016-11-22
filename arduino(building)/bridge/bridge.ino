@@ -20,10 +20,11 @@
 **********************************/
 
 // Data protocol
-#define DATA_MOTION 'D'
-#define DATA_ZOOMIN 'C'
-#define DATA_DRAWING 'B'
-#define DATA_PASSPAGE 'A'
+
+#define DATA_MOTION "D"
+#define DATA_ZOOMIN "C"
+#define DATA_DRAWING "B"
+#define DATA_PASSPAGE "A"
 
 // HID delay
 #define key_press_delay 30             
@@ -35,8 +36,8 @@ boolean Zoom_flag = false;                      // Zoom Flag
 boolean Serial_control_flag = false;            // received serial data control flag
 boolean mouse_press_flag = false;
 
-// Global variable
-unsigned char function_state = 'N';               // function state base on state data
+// Global Variables
+String function_state = "N";               // function state base on state data
 short X = 0;                                    // HID mouse X position
 short Y = 0;                                    // HID mouse Y position
 
@@ -185,7 +186,7 @@ void loop(){                                   // Main Loop Proc
                 
             }
 
-            function_state = 'N';
+            function_state = "N";
         }
     }
 }
