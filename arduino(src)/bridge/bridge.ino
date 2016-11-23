@@ -134,13 +134,11 @@ void loop(){                                   // Main Loop Proc
                 case DATA_PASSPAGE:
 
                     Mouse.click(MOUSE_LEFT);
-                    delay(500);
                     break;
                 case DATA_BACKPAGE:
                     Keyboard.press('p');
                     delay(key_press_delay);
                     Keyboard.release('p');
-                    delay(500);
                     break;
                 // Motion controll section
                 case DATA_MOTION:                                       
