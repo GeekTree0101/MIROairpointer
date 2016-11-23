@@ -3,7 +3,7 @@
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
-    update : 2016.11.15. 22:05
+    update : 2016.11.23 12:35
 ***********************************/
 
 /**********************************
@@ -17,21 +17,25 @@
     [+] Global & Const Variables
 **********************************/
 
-#define Drawing_button 7                //Button Pin (PULL-UP Button)
-#define Click_button 8
-#define ZoomIn_button 9
-#define Motion_button 10
-#define Lazer_button 11
+#define Motion_button 12
+#define ZoomIn_button 11
+#define Drawing_button 10             
+#define Next_Page_button 9
+#define Back_Page_button 8
+#define Speaker 7
+#define Lazer_button 6
 
 #define key_press_delay 30              //key & Mouse Motion delay time
 #define mouse_press_delay 50
 #define Hardware_delay 10               //Hardware Delay
-
+#define SPEAKER_DURATION 100
+#define LOCK_DRURATION 200
 // Data protocol
 #define DATA_MOTION 1
 #define DATA_ZOOMIN 2
 #define DATA_DRAWING 3
 #define DATA_PASSPAGE 4
+#define DATA_BACKPAGE 5
 #define DATA_DEFAULT 7
 /**********************************
         [+] Function
@@ -48,6 +52,7 @@ boolean zoomin_flag = false;
 //Program Locker
 unsigned int lock = 0;
 boolean lock_check  = false;
+boolean sound_effect = false;
 
 void setup(){                               //Hardware Setup
 
@@ -77,7 +82,7 @@ void loop(){                                //Main Loop Proc
               
               lock++;
               
-              if(lock > 400){
+              if(lock > LOCK_DRURATION){
                 lock = 0;
                 lock_check = false;
               }      
@@ -104,7 +109,7 @@ void loop(){                                //Main Loop Proc
         Y = Check_Y(Data_Stack[4]);
         
 
-        if(digitalRead(Click_button) == LOW && lock == 0){              //Click Function
+        if(digitalRead(Next_Page_button) == LOW && lock == 0){              //Click Function
 
             packet = packet + "*";
             packet = packet  + DATA_PASSPAGE; 
@@ -118,6 +123,23 @@ void loop(){                                //Main Loop Proc
             
             lock_check = true;
             lock++;
+            tone(Speaker, 2000, SPEAKER_DURATION);
+        }
+        else if(digitalRead(Back_Page_button) == LOW && lock == 0){              //Click Function
+            
+            packet = packet + "*";
+            packet = packet  + DATA_BACKPAGE; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
+            
+            lock_check = true;
+            lock++;
+            tone(Speaker, 1000, SPEAKER_DURATION);
         }
         else if(digitalRead(Drawing_button) == LOW  && lock == 0){
 
@@ -134,8 +156,19 @@ void loop(){                                //Main Loop Proc
             lock++;
             drawing_flag = ~drawing_flag + 2;
             lock_check = true;
+
+            if(sound_effect == true){
+              tone(Speaker, 1000, SPEAKER_DURATION);
+              sound_effect = false;
+            }
+            else{
+              tone(Speaker, 2000, SPEAKER_DURATION);
+              sound_effect = true;
+            }
+            
         }
         else if(digitalRead(ZoomIn_button) == LOW  && lock == 0){             //ZoomIn Function
+
             packet = packet + "*";
             packet = packet  + DATA_ZOOMIN; 
             packet = packet + "/";
@@ -149,6 +182,15 @@ void loop(){                                //Main Loop Proc
             lock++;
             zoomin_flag = ~zoomin_flag + 2;
             lock_check = true;
+            
+            if(sound_effect == true){
+              tone(Speaker, 1000, SPEAKER_DURATION);
+              sound_effect = false;
+            }
+            else{
+              tone(Speaker, 2000, SPEAKER_DURATION);
+              sound_effect = true;
+            }           
         }
         else if(digitalRead(Motion_button) == LOW){              //Motion Control
 
@@ -189,22 +231,20 @@ void Button_setup(){                                      //Pull-up Digital Butt
 
     //FIXME : Must script base on DDR, PORT register
 
-    pinMode(Drawing_button,INPUT);  //DDRE.6 0b 0X00 0000 X:1  (1 = INPUT)
-    pinMode(Click_button ,INPUT);   //DDRB.4 0b 000X 0000 X:1
-    pinMode(ZoomIn_button,INPUT);   //DDRB.5 0b 00X0 0000 X:1
-    pinMode(Motion_button,INPUT);   //DDRB.6 0b 0X00 0000 X:1
-    pinMode(Lazer_button,OUTPUT);   //DDRB.7 0b X000 0000 X:0  (0 = OUTPUT)
-    
-    //DDRE = 0x40;
-    //DDRB = 0x70;  
+    pinMode(Drawing_button,INPUT);  
+    pinMode(Next_Page_button ,INPUT);   
+    pinMode(ZoomIn_button,INPUT);   
+    pinMode(Motion_button,INPUT);   
+    pinMode(Back_Page_button , INPUT);
+    pinMode(Lazer_button,OUTPUT);  
+    pinMode(Speaker,OUTPUT);  
 
-    digitalWrite(Drawing_button,HIGH); //PORTE.6 0b0X00 0000 X:1
-    digitalWrite(Click_button ,HIGH);  //PORTB.4
-    digitalWrite(ZoomIn_button,HIGH);  //PORTB.5
-    digitalWrite(Motion_button,HIGH);  //PORTB.6 0bXXXX 0000 X:1 (1 = HIGH)
+    digitalWrite(Drawing_button,HIGH); 
+    digitalWrite(Next_Page_button ,HIGH);  
+    digitalWrite(ZoomIn_button,HIGH);  
+    digitalWrite(Back_Page_button, HIGH);
+    digitalWrite(Motion_button,HIGH); 
 
-    //PORTB = 0xF0;
-    //PORTE = 0x40;
 }
 
 void MPU_setup(){                           //MPU6050 Init Setup
