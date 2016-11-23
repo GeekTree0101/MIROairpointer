@@ -3,7 +3,7 @@
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
-    update : 2016.11.16 15:44
+    update : 2016.11.23 12:37
 ***********************************/
 
 
@@ -20,10 +20,13 @@
 **********************************/
 
 //function state data
+// Data protocol
 #define DATA_MOTION 1
 #define DATA_ZOOMIN 2
 #define DATA_DRAWING 3
 #define DATA_PASSPAGE 4
+#define DATA_BACKPAGE 5
+#define DATA_DEFAULT 7
 
 // HID delay
 #define key_press_delay 30             
@@ -133,7 +136,12 @@ void loop(){                                   // Main Loop Proc
                     Mouse.click(MOUSE_LEFT);
                     delay(500);
                     break;
-
+                case DATA_BACKPAGE:
+                    Keyboard.press('p');
+                    delay(key_press_delay);
+                    Keyboard.release('p');
+                    delay(500);
+                    break;
                 // Motion controll section
                 case DATA_MOTION:                                       
 
