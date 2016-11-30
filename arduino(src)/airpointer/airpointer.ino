@@ -57,7 +57,7 @@ void setup(){                               //Hardware Setup
     Serial1.begin(9600);                     //bluetooth serial 9600 baudrate
     Button_setup();
     MPU_setup();
-    PORTE = 0xFF;
+    PORTE = 0x40;
     delay(2000);
     PORTE = 0x00;
 }
@@ -123,7 +123,7 @@ void loop(){                                //Main Loop Proc
             
             lock_check = true;
             lock++;
-            PORTE = 0xFF;
+            PORTE = 0x40;
         }
         else if(digitalRead(Back_Page_button) == LOW && lock == 0){              //Click Function
             
@@ -139,7 +139,7 @@ void loop(){                                //Main Loop Proc
             
             lock_check = true;
             lock++;
-            PORTE = 0xFF; 
+            PORTE = 0x40; 
         }
         else if(digitalRead(Drawing_button) == LOW  && lock == 0){
 
@@ -156,7 +156,7 @@ void loop(){                                //Main Loop Proc
             lock++;
             drawing_flag = ~drawing_flag + 2;
             lock_check = true;
-            PORTE = 0xFF;
+            PORTE = 0x40;
             
         }
         else if(digitalRead(ZoomIn_button) == LOW  && lock == 0){             //ZoomIn Function
@@ -174,7 +174,7 @@ void loop(){                                //Main Loop Proc
             lock++;
             zoomin_flag = ~zoomin_flag + 2;
             lock_check = true;
-            PORTE = 0xFF;
+            PORTE = 0x40;
         }
         else if(digitalRead(Motion_button) == LOW){              //Motion Control
 
