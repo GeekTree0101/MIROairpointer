@@ -3,7 +3,7 @@
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
-    update : 2016.11.23 12:37
+    update : 2016.11.25 12:56
 ***********************************/
 
 
@@ -65,7 +65,7 @@ void setup(){                                  //Hardware Setup
     //NOTE : arduino micro(atmega32u4) using Serial1 
 
     Serial1.begin(9600);
-    Serial.begin(9600);
+    //Serial.begin(9600);                       //DEBUG
     Mouse_interface_setup();
     Keyboard_interface_setup();
 }

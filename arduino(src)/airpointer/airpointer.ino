@@ -3,7 +3,7 @@
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
-    update : 2016.11.23 12:35
+    update : 2016.11.25 12:56
 ***********************************/
 
 /**********************************
@@ -22,13 +22,12 @@
 #define Drawing_button 10             
 #define Next_Page_button 9
 #define Back_Page_button 8
-#define Speaker 7
+#define STATE_LED 7
 #define Lazer_button 6
 
 #define key_press_delay 30              //key & Mouse Motion delay time
 #define mouse_press_delay 50
 #define Hardware_delay 10               //Hardware Delay
-#define SPEAKER_DURATION 100
 #define LOCK_DRURATION 200
 // Data protocol
 #define DATA_MOTION 1
@@ -52,15 +51,15 @@ boolean zoomin_flag = false;
 //Program Locker
 unsigned int lock = 0;
 boolean lock_check  = false;
-boolean sound_effect = false;
 
 void setup(){                               //Hardware Setup
 
     Serial1.begin(9600);                     //bluetooth serial 9600 baudrate
     Button_setup();
     MPU_setup();
+    PORTE = 0xFF;
     delay(2000);
-    
+    PORTE = 0x00;
 }
 
 void loop(){                                //Main Loop Proc
@@ -85,6 +84,7 @@ void loop(){                                //Main Loop Proc
               if(lock > LOCK_DRURATION){
                 lock = 0;
                 lock_check = false;
+                PORTE = 0x00;
               }      
         }
         
@@ -107,7 +107,7 @@ void loop(){                                //Main Loop Proc
 
         X = Check_X(Data_Stack[6]);
         Y = Check_Y(Data_Stack[4]);
-        
+       
 
         if(digitalRead(Next_Page_button) == LOW && lock == 0){              //Click Function
 
@@ -123,7 +123,7 @@ void loop(){                                //Main Loop Proc
             
             lock_check = true;
             lock++;
-            tone(Speaker, 2000, SPEAKER_DURATION);
+            PORTE = 0xFF;
         }
         else if(digitalRead(Back_Page_button) == LOW && lock == 0){              //Click Function
             
@@ -139,7 +139,7 @@ void loop(){                                //Main Loop Proc
             
             lock_check = true;
             lock++;
-            tone(Speaker, 1000, SPEAKER_DURATION);
+            PORTE = 0xFF; 
         }
         else if(digitalRead(Drawing_button) == LOW  && lock == 0){
 
@@ -156,15 +156,7 @@ void loop(){                                //Main Loop Proc
             lock++;
             drawing_flag = ~drawing_flag + 2;
             lock_check = true;
-
-            if(sound_effect == true){
-              tone(Speaker, 1000, SPEAKER_DURATION);
-              sound_effect = false;
-            }
-            else{
-              tone(Speaker, 2000, SPEAKER_DURATION);
-              sound_effect = true;
-            }
+            PORTE = 0xFF;
             
         }
         else if(digitalRead(ZoomIn_button) == LOW  && lock == 0){             //ZoomIn Function
@@ -182,15 +174,7 @@ void loop(){                                //Main Loop Proc
             lock++;
             zoomin_flag = ~zoomin_flag + 2;
             lock_check = true;
-            
-            if(sound_effect == true){
-              tone(Speaker, 1000, SPEAKER_DURATION);
-              sound_effect = false;
-            }
-            else{
-              tone(Speaker, 2000, SPEAKER_DURATION);
-              sound_effect = true;
-            }           
+            PORTE = 0xFF;
         }
         else if(digitalRead(Motion_button) == LOW){              //Motion Control
 
@@ -203,6 +187,7 @@ void loop(){                                //Main Loop Proc
             packet = packet + "/";
             packet = packet + "*";
             Serial1.println(packet); 
+            
         }
         else{
        
@@ -217,7 +202,7 @@ void loop(){                                //Main Loop Proc
             packet = packet + "/";
             packet = packet + "*";
             Serial1.println(packet); 
-
+            
             }
         
         }
@@ -237,7 +222,7 @@ void Button_setup(){                                      //Pull-up Digital Butt
     pinMode(Motion_button,INPUT);   
     pinMode(Back_Page_button , INPUT);
     pinMode(Lazer_button,OUTPUT);  
-    pinMode(Speaker,OUTPUT);  
+    pinMode(STATE_LED,OUTPUT);  
 
     digitalWrite(Drawing_button,HIGH); 
     digitalWrite(Next_Page_button ,HIGH);  
