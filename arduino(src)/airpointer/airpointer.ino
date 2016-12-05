@@ -3,7 +3,7 @@
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
-    update : 2016.11.25 12:56
+    update : 2016.12.05 12:56
 ***********************************/
 
 /**********************************
@@ -143,36 +143,38 @@ void loop(){                                //Main Loop Proc
         }
         else if(digitalRead(Drawing_button) == LOW  && lock == 0){
 
+            drawing_flag = ~drawing_flag + 2;
+            
             packet = packet + "*";
             packet = packet  + DATA_DRAWING ; 
             packet = packet + "/";
-            packet = packet + X ;
+            packet = packet + drawing_flag ;
             packet = packet + "/";
-            packet = packet + Y;
+            packet = packet + drawing_flag;
             packet = packet + "/";
             packet = packet + "*";
-            Serial1.println(packet); 
+            Serial1.println(packet);
             
             lock++;
-            drawing_flag = ~drawing_flag + 2;
             lock_check = true;
             PORTE = 0x40;
             
         }
         else if(digitalRead(ZoomIn_button) == LOW  && lock == 0){             //ZoomIn Function
 
+            zoomin_flag = ~zoomin_flag + 2;
+            
             packet = packet + "*";
             packet = packet  + DATA_ZOOMIN; 
             packet = packet + "/";
-            packet = packet + X ;
+            packet = packet + zoomin_flag ;
             packet = packet + "/";
-            packet = packet + Y;
+            packet = packet + zoomin_flag;
             packet = packet + "/";
             packet = packet + "*";
             Serial1.println(packet); 
-            
+
             lock++;
-            zoomin_flag = ~zoomin_flag + 2;
             lock_check = true;
             PORTE = 0x40;
         }
