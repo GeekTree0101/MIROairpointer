@@ -3,7 +3,7 @@
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
-    update : 2016.11.25 12:56
+    update : 2016.12.05 01:22
 ***********************************/
 
 
@@ -105,21 +105,22 @@ void loop(){                                   // Main Loop Proc
 
                 // Zoomin control section
                 case DATA_ZOOMIN:  
-                
-                    ZoomIn_event();                // Zoomin flag toogle function
-                    
+                  
+                     Zoom_flag = X;                // Zoomin flag toogle function
+                     
                     if(Zoom_flag == true){      
                         ZoomIn_start();
                     }
                     else{
                         ZoomIn_cancel();
                     }
+                   
                     break;
 
                 // Drawing control section
                 case DATA_DRAWING:
-
-                    Drawing_event();               // Drawing flag toogle function
+                  
+                    Drawing_flag = X;               // Drawing flag toogle function
             
                     if(Drawing_flag == true){
                         Drawing_start();
@@ -127,7 +128,8 @@ void loop(){                                   // Main Loop Proc
                     else{
                         Drawing_cancel();
                     } 
-
+                   
+                   
                     break;
 
                 // Passpage control section
