@@ -53,17 +53,16 @@ void Keyboard_interface_setup();                //Keyboard Init Setup
 //Zoom function
 void ZoomIn_start();
 void ZoomIn_cancel();
-void ZoomIn_event();
+
 
 //Drawing function
 void Drawing_start();
 void Drawing_cancel();
-void Drawing_event();
+
 
 void setup(){                                  //Hardware Setup
 
     //NOTE : arduino micro(atmega32u4) using Serial1 
-
     Serial1.begin(9600);
     //Serial.begin(9600);                       //DEBUG
     Mouse_interface_setup();
@@ -187,23 +186,6 @@ void loop(){                                   // Main Loop Proc
 
             function_state = 99;
         }
-    }
-
-
-void Drawing_event(){                       //Drawing event Function
-
-  if(Zoom_flag == false){
-    Drawing_flag = ~Drawing_flag + 2; 
-  }
-
-}
-
-void ZoomIn_event() {                     //Zoomin function toggling
-  
-  if(Drawing_flag == false){
-     Zoom_flag = ~Zoom_flag + 2;
-  }
-  
 }
 
 void Drawing_start() {                   //Drawing start function
@@ -219,7 +201,6 @@ void Drawing_start() {                   //Drawing start function
     
     delay(30);
 }
-
 
 void Drawing_cancel() {                  //Drawing cancel function
   
