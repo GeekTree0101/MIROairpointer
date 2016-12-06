@@ -96,8 +96,7 @@ void loop(){                                   // Main Loop Proc
          }
       }
                                 
-                                       
-
+                                    
     
         if (Serial_control_flag) {                 // Reality HID control section
         
