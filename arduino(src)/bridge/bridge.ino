@@ -3,23 +3,32 @@
     Copyright(C) 2016 MIRO KyongPook Univ
      
     하현수, 박민규, 황인득,  이재훈, 이동은
-    update : 2016.12.05 01:22
+    update : 2016.12.05 12:56
 ***********************************/
-
 
 /**********************************
        [+] Import Library
 **********************************/
 
-#include <Mouse.h>                            // Mouse lib
-#include <Keyboard.h>                         // Keyboard lib
-#include <unistd.h>                           // string to int lib
-
+#include <Wire.h>
+#include <MPU6050.h>
+#include <stdio.h>
 /**********************************
     [+] Global & Const Variables
 **********************************/
 
-//function state data
+#define Motion_button 12
+#define ZoomIn_button 11
+#define Drawing_button 10             
+#define Next_Page_button 9
+#define Back_Page_button 8
+#define STATE_LED 7
+#define Lazer_button 6
+
+#define key_press_delay 30              //key & Mouse Motion delay time
+#define mouse_press_delay 50
+#define Hardware_delay 10               //Hardware Delay
+#define LOCK_DRURATION 200
 // Data protocol
 #define DATA_MOTION 1
 #define DATA_ZOOMIN 2
@@ -28,223 +37,288 @@
 #define DATA_BACKPAGE 5
 #define DATA_DEFAULT 7
 #define DATA_UPDATE 8
-
-// HID delay
-#define key_press_delay 30             
-#define mouse_press_delay 50
-
-// Process control flag
-boolean Drawing_flag = false;                   // Drawing Flag
-boolean Zoom_flag = false;                      // Zoom Flag
-boolean Serial_control_flag = false;            // received serial data control flag
-boolean mouse_press_flag = false;
-
-// Global variable
-unsigned int function_state = 99;               // function state base on state data
-short X = 0;                                    // HID mouse X position
-short Y = 0;                                    // HID mouse Y position
-
 /**********************************
         [+] Function
 ***********************************/
 
-void Mouse_interface_setup();                   //Mouse Init Setup
-void Keyboard_interface_setup();                //Keyboard Init Setup
+void Button_setup();                    //Pull-up Digital Button
+void MPU_setup();                       //MPU6050 Init Setup
+short Check_X(int Data);                //Calculate X position
+short Check_Y(int Data);                //Calculate Y position
 
-//Zoom function
-void ZoomIn_start();
-void ZoomIn_cancel();
+boolean drawing_flag = false;
+boolean zoomin_flag = false;
 
+//Program Locker
+unsigned int lock = 0;
+boolean lock_check  = false;
+unsigned short count_update = 0;
 
-//Drawing function
-void Drawing_start();
-void Drawing_cancel();
+void setup(){                               //Hardware Setup
 
-
-void setup(){                                  //Hardware Setup
-
-    //NOTE : arduino micro(atmega32u4) using Serial1 
-    Serial1.begin(9600);
-    //Serial.begin(9600);                       //DEBUG
-    Mouse_interface_setup();
-    Keyboard_interface_setup();
+    Serial1.begin(9600);                     //bluetooth serial 9600 baudrate
+    Button_setup();
+    MPU_setup();
+    PORTE = 0x40;
+    delay(2000);
+    PORTE = 0x00;
 }
 
-void loop(){                                   // Main Loop Proc
+void loop(){                                //Main Loop Proc
 
-    char node[4] ={ ' ' };                     // char buffer
+    //NOTE : Must import Low Battery System Cuz, overhead very big in this loop
     
-    unsigned short node_index = 0;
-    unsigned short output_pos = 0;    
+    int16_t* Data_Stack;
+    Data_Stack = (int16_t*)malloc(7*sizeof(int16_t));
+    
 
-    
     while(1){
+
+
+        /*
+         * Locker : 카운트 레지스터를 이용한 프로그래밍 적인 딜레이 연출
+         * No delay() API
+        */
+        if(lock_check == true){
+              
+              lock++;
+              
+              if(lock > LOCK_DRURATION){
+                lock = 0;
+                lock_check = false;
+                PORTE = 0x00;
+              }      
+        }
         
-         if(Serial1.available()){
-                
-                Serial1.flush();
-                String str = Serial1.readStringUntil('*');
-                str = Serial1.readStringUntil('/');
-                function_state = str.toInt();
-                str = Serial1.readStringUntil('/');
-                X = str.toInt();
-                str = Serial1.readStringUntil('/');
-                Y = str.toInt();
-                str = Serial1.readStringUntil('*');
-                Serial_control_flag = true;   
-                break;
-         }
-      }                    
-                                    
-    
-        if (Serial_control_flag) {                 // Reality HID control section
-        
-            switch(function_state){
+        short X = 0;
+        short Y = 0;
+        String packet = "";
 
-                case DATA_UPDATE:                  // Data update
+        Wire.beginTransmission(0x68);         //Begin MPU
+        Wire.write(0x3B);
+        Wire.endTransmission(false);             //Sustain connection
+        Wire.requestFrom(0x68, 14, true);
 
-                    Zoom_flag = X;
-                    Drawing_flag = Y;
+        Data_Stack[0] = Wire.read() << 8 | Wire.read();  // X acc data
+        Data_Stack[1] = Wire.read() << 8 | Wire.read();  // Y acc data
+        Data_Stack[2] = Wire.read() << 8 | Wire.read();   // Z acc data
+        Data_Stack[3] = Wire.read() << 8 | Wire.read();   // Temp
+        Data_Stack[4] = Wire.read() << 8 | Wire.read();   // X gyro data select
+        Data_Stack[5] = Wire.read() << 8 | Wire.read();   // Y gyro data
+        Data_Stack[6] = Wire.read() << 8 | Wire.read();   // Z gyro data select
 
-                    break;
+        X = Check_X(Data_Stack[6]);
+        Y = Check_Y(Data_Stack[4]);
+       
 
-                // Zoomin control section
-                case DATA_ZOOMIN:  
-                  
-                     Zoom_flag = X;                // Zoomin flag toogle function
-                     
-                    if(Zoom_flag == true){      
-                        ZoomIn_start();
-                    }
-                    else{
-                        ZoomIn_cancel();
-                    }
-                   
-                    break;
+        if(digitalRead(Next_Page_button) == LOW && lock == 0){              //Click Function
 
-                // Drawing control section
-                case DATA_DRAWING:
-                  
-                    Drawing_flag = X;               // Drawing flag toogle function
+            packet = packet + "*";
+            packet = packet  + DATA_PASSPAGE; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
             
-                    if(Drawing_flag == true){
-                        Drawing_start();
-                    }
-                    else{
-                        Drawing_cancel();
-                    } 
-                   
-                   
-                    break;
+            lock_check = true;
+            lock++;
+            PORTE = 0x40;
+        }
+        else if(digitalRead(Back_Page_button) == LOW && lock == 0){              //Click Function
+            
+            packet = packet + "*";
+            packet = packet  + DATA_BACKPAGE; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
+            
+            lock_check = true;
+            lock++;
+            PORTE = 0x40; 
+        }
+        else if(digitalRead(Drawing_button) == LOW  && lock == 0){
 
-                // Passpage control section
-                case DATA_PASSPAGE:
+            drawing_flag = ~drawing_flag + 2;
+            
+            packet = packet + "*";
+            packet = packet  + DATA_DRAWING ; 
+            packet = packet + "/";
+            packet = packet + drawing_flag ;
+            packet = packet + "/";
+            packet = packet + drawing_flag;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet);
+            
+            lock++;
+            lock_check = true;
+            PORTE = 0x40;
+            
+        }
+        else if(digitalRead(ZoomIn_button) == LOW  && lock == 0){             //ZoomIn Function
 
-                    Mouse.click(MOUSE_LEFT);
-                    break;
-                case DATA_BACKPAGE:
-                    Keyboard.press('p');
-                    delay(key_press_delay);
-                    Keyboard.release('p');
-                    break;
-                // Motion controll section
-                case DATA_MOTION:                                       
+            zoomin_flag = ~zoomin_flag + 2;
+            
+            packet = packet + "*";
+            packet = packet  + DATA_ZOOMIN; 
+            packet = packet + "/";
+            packet = packet + zoomin_flag ;
+            packet = packet + "/";
+            packet = packet + zoomin_flag;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
 
-                    if(Drawing_flag == true && mouse_press_flag == false){
+            lock++;
+            lock_check = true;
+            PORTE = 0x40;
+        }
+        else if(digitalRead(Motion_button) == LOW){              //Motion Control
 
-                        Mouse.press(MOUSE_LEFT);
-                        mouse_press_flag = ~mouse_press_flag + 2;
-                    }
-                    else if(Zoom_flag == true && mouse_press_flag == false){
+            packet = packet + "*";
+            packet = packet  + DATA_MOTION; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
+            
+        }
+        else{
+       
+            if( drawing_flag == true || zoomin_flag == true ){
 
-                        Mouse.press(MOUSE_LEFT);
-                        mouse_press_flag = ~mouse_press_flag + 2;
-                    }
+            packet = packet + "*";
+            packet = packet  + DATA_DEFAULT; 
+            packet = packet + "/";
+            packet = packet + X ;
+            packet = packet + "/";
+            packet = packet + Y;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
+            
+            }
+        
+        }
+
+        count_update ++;
+        if(count_update >= 50){
+          
+            packet = packet + "*";
+            packet = packet  + DATA_UPDATE; 
+            packet = packet + "/";
+            packet = packet + zoomin_flag ;
+            packet = packet + "/";
+            packet = packet + drawing_flag ;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
+
+            count_update = 0;
+          
+        }
+
+       
+    }
+  
+    free(Data_Stack);                                     // Data-Stack memory free
+}
+
+
+void Button_setup(){                                      //Pull-up Digital Button;
+
+    //FIXME : Must script base on DDR, PORT register
+
+    pinMode(Drawing_button,INPUT);  
+    pinMode(Next_Page_button ,INPUT);   
+    pinMode(ZoomIn_button,INPUT);   
+    pinMode(Motion_button,INPUT);   
+    pinMode(Back_Page_button , INPUT);
+    pinMode(Lazer_button,OUTPUT);  
+    pinMode(STATE_LED,OUTPUT);  
+
+    digitalWrite(Drawing_button,HIGH); 
+    digitalWrite(Next_Page_button ,HIGH);  
+    digitalWrite(ZoomIn_button,HIGH);  
+    digitalWrite(Back_Page_button, HIGH);
+    digitalWrite(Motion_button,HIGH); 
+
+}
+
+void MPU_setup(){                           //MPU6050 Init Setup
+
+    Wire.begin();
+    Wire.beginTransmission(0x68);
+    Wire.write(0x6B);
+    Wire.write(0);
+    Wire.endTransmission(true);
+    delay(30);
+}
+
+short Check_X(int Data) {
+
+            short Xval;  
+
+            if(Data > 1000) {
+
+              Xval = -2-Data / 1000;
+            }
+            else if( Data < -1000) {
+            
+              Xval = 2-Data / 1000;
+            }
+            else if(Data > 500 && Data < 1000)  {                
+              
+              Xval = -3;               
+            }
+            else if(Data > -1000 && Data < -500) {
+              
+              Xval = 3;
+            }
+            else {
                 
-                    Mouse.move(X,Y,0);
+              Xval = 0;
+            }
+            
 
-                    break;
-                default :
+            return -Xval;
+}
 
-                    if( Drawing_flag == true || Zoom_flag == true ){     //Zoom or Drawing active state
 
-                        if(mouse_press_flag == true){
+short Check_Y(int Data) {
+  
+            short Yval;
 
-                            Mouse.release(MOUSE_LEFT); 
-                            mouse_press_flag = false;
-                        }
-
-                    
-                        Mouse.move(X,Y,0);
-                    }
-                    else{
-
-                        if(mouse_press_flag == true){
-                        
-                            Mouse.release(MOUSE_ALL);
-                            mouse_press_flag = false;
-                        }
-
-                    
-                    }
+            if(Data > 1000) {
+            
+              Yval = Data / 1000;
+            }
+            else if(Data < -1000){
+            
+              Yval = Data / 1000;
+            }
+            else if(Data > 500 && Data < 1000)  {                
+              
+              Yval = 1;               
+            }
+            else if(Data > -1000 && Data < -500) {
                 
+                Yval = -1;
+             }
+            else {
+                
+                Yval = 0;
             }
 
-            function_state = 99;
-        }
-}
-
-void Drawing_start() {                   //Drawing start function
-  
-    Keyboard.press(KEY_LEFT_CTRL);
-    delay(key_press_delay);
-    Keyboard.press('p');
-    delay(key_press_delay);
-    Keyboard.release('p');
-    delay(key_press_delay);
-    Keyboard.release(KEY_LEFT_CTRL);
-    delay(key_press_delay);
-    
-    delay(30);
-}
-
-void Drawing_cancel() {                  //Drawing cancel function
-  
-    Keyboard.press(KEY_LEFT_CTRL);
-    delay(key_press_delay);
-    Keyboard.press('a');
-    delay(key_press_delay);
-    Keyboard.release('a');
-    delay(key_press_delay);
-    Keyboard.release(KEY_LEFT_CTRL);
-    delay(key_press_delay);
-
-    delay(30);
-}
-
-void ZoomIn_start(){                       //Zoomin event Function
-
-     Keyboard.press(KEY_LEFT_CTRL);
-     delay(key_press_delay);
-     Mouse.move(0,0,3);
-     delay(key_press_delay);
-     Keyboard.release(KEY_LEFT_CTRL);
-     
-}
-
-void ZoomIn_cancel() {
-    Keyboard.write(0x30);
-    delay(key_press_delay);
-}
-
-void Mouse_interface_setup(){               //Mouse Init Setup
-
-    Mouse.begin();
-    delay(30);
-}
-
-void Keyboard_interface_setup(){            //Keyboard Init Setup
-
-    Keyboard.begin();
-    delay(30);
-}
+            return Yval;
+ }
