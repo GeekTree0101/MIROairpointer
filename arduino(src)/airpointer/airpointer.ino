@@ -36,6 +36,7 @@
 #define DATA_PASSPAGE 4
 #define DATA_BACKPAGE 5
 #define DATA_DEFAULT 7
+#define DATA_UPDATE 8
 /**********************************
         [+] Function
 ***********************************/
@@ -51,6 +52,7 @@ boolean zoomin_flag = false;
 //Program Locker
 unsigned int lock = 0;
 boolean lock_check  = false;
+unsigned short count_update = 0;
 
 void setup(){                               //Hardware Setup
 
@@ -208,6 +210,25 @@ void loop(){                                //Main Loop Proc
             }
         
         }
+
+        count_update ++;
+        if(count_update >= 50){
+          
+            packet = packet + "*";
+            packet = packet  + DATA_UPDATE; 
+            packet = packet + "/";
+            packet = packet + zoomin_flag ;
+            packet = packet + "/";
+            packet = packet + drawing_flag ;
+            packet = packet + "/";
+            packet = packet + "*";
+            Serial1.println(packet); 
+
+            count_update = 0;
+          
+        }
+
+       
     }
   
     free(Data_Stack);                                     // Data-Stack memory free
@@ -270,7 +291,7 @@ short Check_X(int Data) {
             }
             
 
-            return Xval;
+            return -Xval;
 }
 
 
