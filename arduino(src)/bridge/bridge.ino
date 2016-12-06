@@ -27,6 +27,7 @@
 #define DATA_PASSPAGE 4
 #define DATA_BACKPAGE 5
 #define DATA_DEFAULT 7
+#define DATA_UPDATE 8
 
 // HID delay
 #define key_press_delay 30             
@@ -101,6 +102,13 @@ void loop(){                                   // Main Loop Proc
         if (Serial_control_flag) {                 // Reality HID control section
         
             switch(function_state){
+
+                case DATA_UPDATE:                  // Data update
+
+                    Zoom_flag = X;
+                    Drawing_flag = Y;
+
+                    break;
 
                 // Zoomin control section
                 case DATA_ZOOMIN:  
